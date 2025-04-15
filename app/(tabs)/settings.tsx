@@ -88,7 +88,8 @@ const SettingsItem = ({
 );
 
 export default function SettingsScreen() {
-  const { preferences, setDarkMode } = useUserPreferences();
+  const { preferences, setDarkMode, setAutoOpenLastFile } =
+    useUserPreferences();
   const theme = useTheme();
   const [preferencesState, setPreferences] = useState(defaultPreferences);
   const appVersion = Application.nativeApplicationVersion || "1.0.0";
@@ -432,6 +433,20 @@ export default function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="일반 설정" styles={styles}>
+        <SettingsItem
+          icon="file"
+          iconColor="#007AFF"
+          title="마지막 파일 자동 열기"
+          subtitle="앱 시작 시 마지막으로 열었던 파일을 자동으로 엽니다"
+          right={
+            <Switch
+              value={preferences.autoOpenLastFile}
+              onValueChange={setAutoOpenLastFile}
+              trackColor={{ false: "#D1D1D6", true: "#007AFF" }}
+            />
+          }
+          styles={styles}
+        />
         <SettingsItem
           icon="refresh"
           iconColor="#8E8E93"

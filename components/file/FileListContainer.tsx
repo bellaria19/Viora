@@ -25,7 +25,7 @@ export default function FileListContainer({
   isAddingFiles = false,
   onAddFile,
   emptyMessage,
-  sortOption,
+  sortOption = SortOption.NAME_ASC,
   onOpenSortModal,
   onRefresh,
   isRefreshing = false,
@@ -33,7 +33,10 @@ export default function FileListContainer({
   return (
     <View style={styles.container}>
       {data.length > 0 && onOpenSortModal && (
-        <SortToolbar onOpenSortModal={onOpenSortModal} />
+        <SortToolbar
+          onOpenSortModal={onOpenSortModal}
+          sortOption={sortOption}
+        />
       )}
       <FileList
         data={data}

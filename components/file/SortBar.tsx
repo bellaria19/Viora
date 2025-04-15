@@ -1,13 +1,22 @@
-import { View, TouchableOpacity, StyleSheet } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { useTheme } from "@react-navigation/native";
+import { SortOption, sortOptions } from "@/types/sort";
 
 interface SortToolbarProps {
   onOpenSortModal: () => void;
+  sortOption: SortOption;
 }
 
-export default function SortToolbar({ onOpenSortModal }: SortToolbarProps) {
+export default function SortToolbar({
+  onOpenSortModal,
+  sortOption,
+}: SortToolbarProps) {
   const theme = useTheme();
+
+  // 현재 선택된 정렬 옵션의 라벨 찾기
+  const currentSortLabel =
+    sortOptions.find((option) => option.id === sortOption)?.label || "정렬";
 
   const styles = StyleSheet.create({
     container: {
@@ -20,8 +29,15 @@ export default function SortToolbar({ onOpenSortModal }: SortToolbarProps) {
       borderBottomColor: theme.colors.border,
     },
     toolbarButton: {
+      flexDirection: "row",
+      alignItems: "center",
       padding: 8,
       marginHorizontal: 4,
+    },
+    sortLabel: {
+      marginLeft: 8,
+      fontSize: 14,
+      color: theme.colors.primary,
     },
   });
 
@@ -29,6 +45,7 @@ export default function SortToolbar({ onOpenSortModal }: SortToolbarProps) {
     <View style={styles.container}>
       <TouchableOpacity style={styles.toolbarButton} onPress={onOpenSortModal}>
         <FontAwesome name="sort" size={20} color={theme.colors.primary} />
+        <Text style={styles.sortLabel}>{currentSortLabel}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -3,28 +3,28 @@ import { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SortOption } from "@/types/sort";
 
-interface UserPreferencesState {
+interface UserPreferences {
   darkMode: boolean;
-  autoOpenLastFile: boolean;
+  autoOpenLastFile: boolean; // Deprecated: 자동 열기 기능 제거 (2024-03-26)
   showThumbnails: boolean;
   defaultSortOption: SortOption;
-  lastOpenedFileId: string | null;
+  lastOpenedFileId: string | null; // Deprecated: 자동 열기 기능 제거 (2024-03-26)
 }
 
 interface UserPreferencesContextType {
-  preferences: UserPreferencesState;
+  preferences: UserPreferences;
   setDarkMode: (value: boolean) => void;
-  setAutoOpenLastFile: (value: boolean) => void;
+  setAutoOpenLastFile: (value: boolean) => void; // Deprecated: 자동 열기 기능 제거 (2024-03-26)
   setShowThumbnails: (value: boolean) => void;
   setDefaultSortOption: (value: SortOption) => void;
-  setLastOpenedFileId: (value: string | null) => void;
+  setLastOpenedFileId: (value: string | null) => void; // Deprecated: 자동 열기 기능 제거 (2024-03-26)
   isLoading: boolean;
   defaultSortOption: SortOption;
 }
 
-const defaultPreferences: UserPreferencesState = {
+const defaultPreferences: UserPreferences = {
   darkMode: false,
-  autoOpenLastFile: true,
+  autoOpenLastFile: false, // Deprecated: 기본값을 false로 설정
   showThumbnails: true,
   defaultSortOption: SortOption.NAME_ASC,
   lastOpenedFileId: null,
@@ -48,7 +48,7 @@ export const UserPreferencesProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [preferences, setPreferences] =
-    useState<UserPreferencesState>(defaultPreferences);
+    useState<UserPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -68,7 +68,7 @@ export const UserPreferencesProvider: React.FC<{
     }
   };
 
-  const savePreferences = async (newPreferences: UserPreferencesState) => {
+  const savePreferences = async (newPreferences: UserPreferences) => {
     try {
       await AsyncStorage.setItem(
         "userPreferences",
@@ -85,7 +85,11 @@ export const UserPreferencesProvider: React.FC<{
     savePreferences(newPreferences);
   };
 
+  // Deprecated: 자동 열기 기능 제거 (2024-03-26)
   const setAutoOpenLastFile = (value: boolean) => {
+    console.warn(
+      "Deprecated: setAutoOpenLastFile is deprecated and will be removed in future versions"
+    );
     const newPreferences = { ...preferences, autoOpenLastFile: value };
     setPreferences(newPreferences);
     savePreferences(newPreferences);
@@ -103,7 +107,11 @@ export const UserPreferencesProvider: React.FC<{
     savePreferences(newPreferences);
   };
 
+  // Deprecated: 자동 열기 기능 제거 (2024-03-26)
   const setLastOpenedFileId = (value: string | null) => {
+    console.warn(
+      "Deprecated: setLastOpenedFileId is deprecated and will be removed in future versions"
+    );
     const newPreferences = { ...preferences, lastOpenedFileId: value };
     setPreferences(newPreferences);
     savePreferences(newPreferences);

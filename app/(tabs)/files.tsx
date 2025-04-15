@@ -43,9 +43,11 @@ export default function FilesScreen() {
     if (searchQuery.trim() === "") {
       setFilteredFiles(files);
     } else {
-      const filtered = files.filter((file) =>
-        file.name.toLowerCase().includes(searchQuery.toLowerCase())
-      );
+      const normalizedQuery = searchQuery.trim().normalize("NFC").toLowerCase();
+      const filtered = files.filter((file) => {
+        const normalizedFileName = file.name.normalize("NFC").toLowerCase();
+        return normalizedFileName.includes(normalizedQuery);
+      });
       setFilteredFiles(filtered);
     }
   }, [searchQuery, files]);
