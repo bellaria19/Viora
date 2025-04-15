@@ -1,8 +1,9 @@
 // components/FileListItem.tsx 파일 생성
 import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import { FileItem } from "./FileList";
+import { FileItem } from "@/types/file";
 import { router } from "expo-router";
+import { updateFileAccessTime } from "@/utils/fileSystem";
 
 interface FileListItemProps {
   item: FileItem;
@@ -72,7 +73,8 @@ export default function FileListItem({ item, onLongPress }: FileListItemProps) {
   //   });
   // };
 
-  const handlePress = () => {
+  const handlePress = async () => {
+    await updateFileAccessTime(item.id);
     router.push(`/(viewer)?id=${item.id}`);
   };
 

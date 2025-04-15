@@ -4,6 +4,14 @@ import * as MediaLibrary from "expo-media-library";
 import * as DocumentPicker from "expo-document-picker";
 import * as Sharing from "expo-sharing";
 import { FileItem } from "@/types/file";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const FILE_ACCESS_HISTORY_KEY = "file_access_history";
+
+interface FileAccessRecord {
+  fileId: string;
+  lastAccessed: number;
+}
 
 export async function getFileList(
   directory: string = FileSystem.documentDirectory || ""
@@ -58,9 +66,7 @@ export async function importFile(): Promise<FileItem | null> {
       to: destinationUri,
     });
 
-    const fileInfo = await FileSystem.getInfoAsync(destinationUri, {
-      size: true,
-    });
+    const fileInfo = await FileSystem.getInfoAsync(destinationUri);
 
     if (fileInfo.exists) {
       const fileType = determineFileType(fileName);
@@ -121,4 +127,60 @@ export function determineFileType(fileName: string): string {
   };
 
   return mimeTypes[extension] || "application/octet-stream";
+}
+
+export async function updateFileAccessTime(fileId: string) {
+  try {
+    const history = await getFileAccessHistory();
+    const updatedHistory = [
+      { fileId, lastAccessed: Date.now() },
+      ...history.filter((record) => record.fileId !== fileId),
+    ].slice(0, 50); // 최대 50개까지만 기록 유지
+
+    await AsyncStorage.setItem(
+      FILE_ACCESS_HISTORY_KEY,
+      JSON.stringify(updatedHistory)
+    );
+  } catch (error) {
+    console.error("파일 접근 시간 업데이트 오류:", error);
+  }
+}
+
+export async function getFileAccessHistory(): Promise<FileAccessRecord[]> {
+  try {
+    const history = await AsyncStorage.getItem(FILE_ACCESS_HISTORY_KEY);
+    return history ? JSON.parse(history) : [];
+  } catch (error) {
+    console.error("파일 접근 기록 조회 오류:", error);
+    return [];
+  }
+}
+
+export async function getRecentFiles(): Promise<FileItem[]> {
+  try {
+    const [allFiles, accessHistory] = await Promise.all([
+      getFileList(),
+      getFileAccessHistory(),
+    ]);
+
+    const recentFiles = allFiles
+      .filter((file) =>
+        accessHistory.some((record) => record.fileId === file.id)
+      )
+      .sort((a, b) => {
+        const aAccess =
+          accessHistory.find((record) => record.fileId === a.id)
+            ?.lastAccessed || 0;
+        const bAccess =
+          accessHistory.find((record) => record.fileId === b.id)
+            ?.lastAccessed || 0;
+        return bAccess - aAccess;
+      })
+      .slice(0, 10);
+
+    return recentFiles;
+  } catch (error) {
+    console.error("최근 파일 조회 오류:", error);
+    return [];
+  }
 }

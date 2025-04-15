@@ -1,7 +1,7 @@
 // contexts/UserPreferences.tsx 파일 생성
 import { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SortOption } from "@/components/types";
+import { SortOption } from "@/types/sort";
 
 interface UserPreferencesState {
   darkMode: boolean;

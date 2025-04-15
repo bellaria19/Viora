@@ -1,5 +1,11 @@
 export interface SortMenuItem {
-  id: "name" | "size" | "type";
+  id:
+    | "name_asc"
+    | "name_desc"
+    | "size_asc"
+    | "size_desc"
+    | "type_asc"
+    | "type_desc";
   label: string;
   icon: string;
 }
@@ -14,9 +20,10 @@ export enum SortOption {
 }
 
 export const sortOptions: SortMenuItem[] = [
-  { id: "name", label: "이름 (오름차순)", icon: "sort-alpha-asc" },
-  { id: "name", label: "이름 (내림차순)", icon: "sort-alpha-desc" },
-  { id: "size", label: "크기 (큰순)", icon: "sort-amount-desc" },
-  { id: "size", label: "크기 (작은순)", icon: "sort-amount-asc" },
-  { id: "type", label: "유형순", icon: "th-large" },
+  { id: "name_asc", label: "이름 (오름차순)", icon: "sort-alpha-asc" },
+  { id: "name_desc", label: "이름 (내림차순)", icon: "sort-alpha-desc" },
+  { id: "size_desc", label: "크기 (큰순)", icon: "sort-amount-desc" },
+  { id: "size_asc", label: "크기 (작은순)", icon: "sort-amount-asc" },
+  { id: "type_asc", label: "유형순", icon: "th-large" },
+  { id: "type_desc", label: "유형순", icon: "th-large" },
 ];

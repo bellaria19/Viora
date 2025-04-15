@@ -7,7 +7,6 @@ export interface ToolbarProps {
   activeTab: TabType;
   currentFolderId: string;
   isImporting: boolean;
-  onRefresh: () => void;
   onOpenSortModal: () => void;
   onPickDocuments: () => void;
 }

@@ -1,11 +1,11 @@
-import { View, StyleSheet } from "react-native";
-import FileList, { FileItem } from "./FileList";
-import FileListToolbar from "./FileListToolbar";
+import { View, StyleSheet, RefreshControl } from "react-native";
+import FileList from "./FileList";
+import SortToolbar from "@/components/file/SortBar";
+import FloatingAddButton from "@/components/file/FloatingAddButton";
+import { FileItem } from "@/types/file";
 import { SortOption } from "@/types/sort";
-import { ToolbarProps } from "@/types/common";
 
 interface FileListContainerProps {
-  // FileList props
   data: FileItem[];
   renderItem: (item: FileItem) => React.ReactElement;
   isLoading?: boolean;
@@ -13,13 +13,12 @@ interface FileListContainerProps {
   onAddFile: () => void;
   emptyMessage?: string;
   sortOption?: SortOption;
-  // Toolbar props
-  showToolbar?: boolean;
-  toolbarProps?: ToolbarProps;
+  onOpenSortModal?: () => void;
+  onRefresh?: () => void;
+  isRefreshing?: boolean;
 }
 
 export default function FileListContainer({
-  // FileList props
   data,
   renderItem,
   isLoading = false,
@@ -27,14 +26,14 @@ export default function FileListContainer({
   onAddFile,
   emptyMessage,
   sortOption,
-  // Toolbar props
-  showToolbar = false,
-  toolbarProps,
+  onOpenSortModal,
+  onRefresh,
+  isRefreshing = false,
 }: FileListContainerProps) {
   return (
     <View style={styles.container}>
-      {showToolbar && data.length > 0 && toolbarProps && (
-        <FileListToolbar {...toolbarProps} />
+      {data.length > 0 && onOpenSortModal && (
+        <SortToolbar onOpenSortModal={onOpenSortModal} />
       )}
       <FileList
         data={data}
@@ -44,7 +43,15 @@ export default function FileListContainer({
         onAddFile={onAddFile}
         emptyMessage={emptyMessage}
         sortOption={sortOption}
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          ) : undefined
+        }
       />
+      {data.length > 0 && (
+        <FloatingAddButton onPress={onAddFile} isDisabled={isAddingFiles} />
+      )}
     </View>
   );
 }

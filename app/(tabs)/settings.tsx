@@ -1,4 +1,3 @@
-// app/(tabs)/settings.tsx
 import {
   View,
   StyleSheet,

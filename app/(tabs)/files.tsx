@@ -22,6 +22,7 @@ export default function FilesScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingFiles, setIsAddingFiles] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [files, setFiles] = useState<FileItem[]>([]);
   const [filteredFiles, setFilteredFiles] = useState<FileItem[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState("root");
@@ -45,7 +46,9 @@ export default function FilesScreen() {
   }, [searchQuery, files]);
 
   const loadFiles = async () => {
-    setIsLoading(true);
+    if (!isRefreshing) {
+      setIsLoading(true);
+    }
     try {
       const fileList = await getFileList();
       setFiles(fileList);
@@ -53,7 +56,9 @@ export default function FilesScreen() {
     } catch (error) {
       console.error("파일 로딩 오류:", error);
     } finally {
-      setIsLoading(false);
+      if (!isRefreshing) {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -73,8 +78,10 @@ export default function FilesScreen() {
     }
   };
 
-  const handleRefresh = () => {
-    loadFiles();
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadFiles();
+    setIsRefreshing(false);
   };
 
   const pickDocuments = async () => {
@@ -115,22 +122,23 @@ export default function FilesScreen() {
     if (!option) return;
 
     switch (option.id) {
-      case "name":
-        setSortOrder(
-          option.label.includes("오름차순")
-            ? SortOption.NAME_ASC
-            : SortOption.NAME_DESC
-        );
+      case "name_asc":
+        setSortOrder(SortOption.NAME_ASC);
         break;
-      case "size":
-        setSortOrder(
-          option.label.includes("작은순")
-            ? SortOption.SIZE_ASC
-            : SortOption.SIZE_DESC
-        );
+      case "name_desc":
+        setSortOrder(SortOption.NAME_DESC);
         break;
-      case "type":
+      case "size_asc":
+        setSortOrder(SortOption.SIZE_ASC);
+        break;
+      case "size_desc":
+        setSortOrder(SortOption.SIZE_DESC);
+        break;
+      case "type_asc":
         setSortOrder(SortOption.TYPE_ASC);
+        break;
+      case "type_desc":
+        setSortOrder(SortOption.TYPE_DESC);
         break;
     }
     setSortModalVisible(false);
@@ -144,7 +152,6 @@ export default function FilesScreen() {
     activeTab: TabType.ALL_FILES,
     currentFolderId,
     isImporting,
-    onRefresh: handleRefresh,
     onOpenSortModal: () => setSortModalVisible(true),
     onPickDocuments: pickDocuments,
   };
@@ -203,10 +210,11 @@ export default function FilesScreen() {
         isLoading={isLoading}
         isAddingFiles={isAddingFiles}
         onAddFile={onAddFile}
-        showToolbar={true}
-        toolbarProps={toolbarProps}
         sortOption={sortOrder}
         emptyMessage={searchQuery ? "검색 결과가 없습니다" : "파일이 없습니다"}
+        onOpenSortModal={() => setSortModalVisible(true)}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
       <SortModal />
     </View>

@@ -10,7 +10,7 @@ import {
   Share,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import FileTypeHandler from "@/components/FileTypeHandler";
+import FileTypeHandler from "@/components/file/FileTypeHandler";
 import * as FileSystem from "expo-file-system";
 import { useUserPreferences } from "@/contexts/UserPreferences";
 

@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
-import { FileItem } from "@/components/FileList";
-import FileListItem from "@/components/FileListItem";
-import { getFileList } from "@/utils/fileSystem";
-import FileListContainer from "@/components/FileListContainer";
-import { SortOption } from "@/components/types";
+import { View, StyleSheet, ActivityIndicator, Alert } from "react-native";
+import { FileItem } from "@/types/file";
+import FileListItem from "@/components/file/FileListItem";
+import { getRecentFiles, importFile } from "@/utils/fileSystem";
+import FileListContainer from "@/components/file/FileListContainer";
+import { SortOption } from "@/types/sort";
 
 export default function HomeScreen() {
   const [isAddingFiles, setIsAddingFiles] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [files, setFiles] = useState<FileItem[]>([]);
 
   useEffect(() => {
@@ -16,27 +17,41 @@ export default function HomeScreen() {
   }, []);
 
   const loadRecentFiles = async () => {
-    setIsLoading(true);
+    if (!isRefreshing) {
+      setIsLoading(true);
+    }
     try {
-      const fileList = await getFileList();
-      // 날짜 기준으로 정렬하여 최근 파일만 표시
-      const sortedFiles = fileList.sort(
-        (a, b) => b.date.getTime() - a.date.getTime()
-      );
-      // 최근 10개 파일만 표시
-      const recentFiles = sortedFiles.slice(0, 10);
+      const recentFiles = await getRecentFiles();
       setFiles(recentFiles);
     } catch (error) {
       console.error("최근 파일 로딩 오류:", error);
     } finally {
-      setIsLoading(false);
+      if (!isRefreshing) {
+        setIsLoading(false);
+      }
     }
   };
 
-  const onAddFile = () => {
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await loadRecentFiles();
+    setIsRefreshing(false);
+  };
+
+  const onAddFile = async () => {
     setIsAddingFiles(true);
-    // 여기서 importFile 함수를 호출하고 파일 목록을 업데이트할 수 있습니다
-    // (생략)
+    try {
+      const file = await importFile();
+      if (file) {
+        setFiles((prevFiles) => [...prevFiles, file]);
+        Alert.alert("성공", "파일이 성공적으로 추가되었습니다.");
+      }
+    } catch (error) {
+      console.error("파일 추가 오류:", error);
+      Alert.alert("오류", "파일을 추가하는 중 오류가 발생했습니다.");
+    } finally {
+      setIsAddingFiles(false);
+    }
   };
 
   const renderFileItem = (item: FileItem) => <FileListItem item={item} />;
@@ -58,7 +73,9 @@ export default function HomeScreen() {
         isAddingFiles={isAddingFiles}
         onAddFile={onAddFile}
         emptyMessage="최근에 열어본 파일이 없습니다"
-        sortOption={SortOption.DATE_DESC}
+        sortOption={SortOption.NAME_ASC}
+        onRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
       />
     </View>
   );
