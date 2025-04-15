@@ -5,12 +5,27 @@ import FileListItem from "@/components/file/FileListItem";
 import { getRecentFiles, importFile } from "@/utils/fileSystem";
 import FileListContainer from "@/components/file/FileListContainer";
 import { SortOption } from "@/types/sort";
+import { useTheme } from "@react-navigation/native";
 
 export default function HomeScreen() {
+  const theme = useTheme();
   const [isAddingFiles, setIsAddingFiles] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [files, setFiles] = useState<FileItem[]>([]);
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
+    },
+  });
 
   useEffect(() => {
     loadRecentFiles();
@@ -58,8 +73,8 @@ export default function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -80,14 +95,3 @@ export default function HomeScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9F9F9",
-  },
-  loadingContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

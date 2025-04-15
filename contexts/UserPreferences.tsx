@@ -19,6 +19,7 @@ interface UserPreferencesContextType {
   setDefaultSortOption: (value: SortOption) => void;
   setLastOpenedFileId: (value: string | null) => void;
   isLoading: boolean;
+  defaultSortOption: SortOption;
 }
 
 const defaultPreferences: UserPreferencesState = {
@@ -118,6 +119,7 @@ export const UserPreferencesProvider: React.FC<{
         setDefaultSortOption,
         setLastOpenedFileId,
         isLoading,
+        defaultSortOption: preferences.defaultSortOption,
       }}
     >
       {children}

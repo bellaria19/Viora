@@ -10,14 +10,19 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { getFileList, importFile, deleteFile } from "@/utils/fileSystem";
 import { TabType } from "@/types/common";
-import { SortOption, sortOptions } from "@/types/sort";
+import { SortMenuItem, SortOption, sortOptions } from "@/types/sort";
 import SearchBar from "@/components/common/SearchBar";
 import FileListContainer from "@/components/file/FileListContainer";
 import { ModalContainer } from "@/components/common/Modal";
 import FileListItem from "@/components/file/FileListItem";
 import { FileItem } from "@/types/file";
+import { useUserPreferences } from "@/contexts/UserPreferences";
+import { useTheme } from "@react-navigation/native";
 
 export default function FilesScreen() {
+  const { preferences, defaultSortOption, setDefaultSortOption } =
+    useUserPreferences();
+  const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingFiles, setIsAddingFiles] = useState(false);
@@ -27,7 +32,7 @@ export default function FilesScreen() {
   const [filteredFiles, setFilteredFiles] = useState<FileItem[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState("root");
   const [sortModalVisible, setSortModalVisible] = useState(false);
-  const [sortOrder, setSortOrder] = useState<SortOption>(SortOption.NAME_ASC);
+  const [sortOrder, setSortOrder] = useState<SortOption>(defaultSortOption);
 
   useEffect(() => {
     loadFiles();
@@ -117,30 +122,9 @@ export default function FilesScreen() {
     ]);
   };
 
-  const handleSortOptionSelect = (optionId: string) => {
-    const option = sortOptions.find((opt) => opt.id === optionId);
-    if (!option) return;
-
-    switch (option.id) {
-      case "name_asc":
-        setSortOrder(SortOption.NAME_ASC);
-        break;
-      case "name_desc":
-        setSortOrder(SortOption.NAME_DESC);
-        break;
-      case "size_asc":
-        setSortOrder(SortOption.SIZE_ASC);
-        break;
-      case "size_desc":
-        setSortOrder(SortOption.SIZE_DESC);
-        break;
-      case "type_asc":
-        setSortOrder(SortOption.TYPE_ASC);
-        break;
-      case "type_desc":
-        setSortOrder(SortOption.TYPE_DESC);
-        break;
-    }
+  const handleSortOptionSelect = (option: SortMenuItem) => {
+    setSortOrder(option.id as SortOption);
+    setDefaultSortOption(option.id as SortOption);
     setSortModalVisible(false);
   };
 
@@ -171,7 +155,7 @@ export default function FilesScreen() {
               styles.sortOption,
               sortOrder.startsWith(option.id) && styles.sortOptionSelected,
             ]}
-            onPress={() => handleSortOptionSelect(option.id)}
+            onPress={() => handleSortOptionSelect(option)}
           >
             <FontAwesome
               name={option.icon as keyof typeof FontAwesome.glyphMap}
@@ -193,10 +177,58 @@ export default function FilesScreen() {
     </ModalContainer>
   );
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: theme.colors.background,
+    },
+    modalContainer: {
+      padding: 20,
+      backgroundColor: theme.colors.card,
+      borderRadius: 12,
+      width: "80%",
+    },
+    modalContent: {
+      width: "100%",
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: "600",
+      marginBottom: 16,
+      textAlign: "center",
+      color: theme.colors.text,
+    },
+    sortOption: {
+      flexDirection: "row",
+      alignItems: "center",
+      padding: 12,
+      marginVertical: 4,
+      borderRadius: 8,
+      backgroundColor: theme.colors.card,
+    },
+    sortOptionSelected: {
+      backgroundColor: theme.colors.primary,
+    },
+    sortOptionText: {
+      marginLeft: 12,
+      fontSize: 16,
+      color: theme.colors.text,
+    },
+    sortOptionTextSelected: {
+      color: theme.colors.background,
+    },
+  });
+
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color="#007AFF" />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
@@ -220,48 +252,3 @@ export default function FilesScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F9F9F9",
-  },
-  loadingContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalContainer: {
-    padding: 20,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    width: "80%",
-  },
-  modalContent: {
-    width: "100%",
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  sortOption: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 12,
-    marginVertical: 4,
-    borderRadius: 8,
-    backgroundColor: "#F8F8F8",
-  },
-  sortOptionSelected: {
-    backgroundColor: "#007AFF",
-  },
-  sortOptionText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: "#007AFF",
-  },
-  sortOptionTextSelected: {
-    color: "#FFFFFF",
-  },
-});

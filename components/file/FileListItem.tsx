@@ -4,6 +4,7 @@ import { FontAwesome } from "@expo/vector-icons";
 import { FileItem } from "@/types/file";
 import { router } from "expo-router";
 import { updateFileAccessTime } from "@/utils/fileSystem";
+import { useTheme } from "@react-navigation/native";
 
 interface FileListItemProps {
   item: FileItem;
@@ -11,6 +12,48 @@ interface FileListItemProps {
 }
 
 export default function FileListItem({ item, onLongPress }: FileListItemProps) {
+  const theme = useTheme();
+
+  const styles = StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: theme.colors.card,
+      paddingVertical: 12,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.border,
+    },
+    iconContainer: {
+      width: 40,
+      height: 40,
+      justifyContent: "center",
+      alignItems: "center",
+      marginRight: 12,
+    },
+    infoContainer: {
+      flex: 1,
+      justifyContent: "center",
+    },
+    fileName: {
+      fontSize: 16,
+      fontWeight: "500",
+      marginBottom: 4,
+      color: theme.colors.text,
+    },
+    detailsContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    fileDetails: {
+      fontSize: 13,
+      color: theme.colors.text + "80",
+    },
+    moreButton: {
+      padding: 8,
+    },
+  });
+
   const getFileIcon = (fileType: string): string => {
     // 파일 타입에 따라 적절한 아이콘 반환
     switch (fileType) {
@@ -39,8 +82,6 @@ export default function FileListItem({ item, onLongPress }: FileListItemProps) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
-
-  // const formatDate = (date: Date): string => {
   //   const now = new Date();
   //   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   //   const fileDate = new Date(
@@ -88,7 +129,7 @@ export default function FileListItem({ item, onLongPress }: FileListItemProps) {
         <FontAwesome
           name={getFileIcon(item.type) as keyof typeof FontAwesome.glyphMap}
           size={28}
-          color="#4A6DA7"
+          color={theme.colors.primary}
         />
       </View>
       <View style={styles.infoContainer}>
@@ -100,47 +141,12 @@ export default function FileListItem({ item, onLongPress }: FileListItemProps) {
         </View>
       </View>
       <TouchableOpacity style={styles.moreButton}>
-        <FontAwesome name="ellipsis-v" size={18} color="#8E8E93" />
+        <FontAwesome
+          name="ellipsis-v"
+          size={18}
+          color={theme.colors.text + "80"}
+        />
       </TouchableOpacity>
     </TouchableOpacity>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  infoContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  fileName: {
-    fontSize: 16,
-    fontWeight: "500",
-    marginBottom: 4,
-  },
-  detailsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  fileDetails: {
-    fontSize: 13,
-    color: "#8E8E93",
-  },
-  moreButton: {
-    padding: 8,
-  },
-});
