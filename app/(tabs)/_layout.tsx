@@ -1,43 +1,46 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
+import { Tabs } from "expo-router";
+import { FontAwesome } from "@expo/vector-icons";
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
-import { Colors } from '@/constants/Colors';
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function TabsLayout() {
   return (
     <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
-      }}>
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName: keyof typeof FontAwesome.glyphMap = "file-o";
+
+          if (route.name === "index") {
+            iconName = focused ? "home" : "home";
+          } else if (route.name === "files") {
+            iconName = focused ? "folder" : "folder-o";
+          } else if (route.name === "settings") {
+            iconName = focused ? "cog" : "cog";
+          }
+
+          return <FontAwesome name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "#007AFF",
+        tabBarInactiveTintColor: "gray",
+      })}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "최근 파일",
+          headerTitleAlign: "center",
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="files"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "모든 파일",
+          headerTitleAlign: "center",
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: "설정",
+          headerTitleAlign: "center",
         }}
       />
     </Tabs>

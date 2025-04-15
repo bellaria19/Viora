@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Viora",
-    "slug": "Viora",
+    "slug": "viora",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "2ba09785-e5dc-42a5-a7cf-8ccbd24db789"
+      }
+    },
+    "owner": "bellaria"
   }
 }
