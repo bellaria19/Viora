@@ -1,35 +1,15 @@
 import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-
-export enum ViewMode {
-  LIST = "list",
-  GRID = "grid",
-}
-
-export enum TabType {
-  ALL_FILES = "all_files",
-  RECENT = "recent",
-}
-
-interface FileListToolbarProps {
-  activeTab: TabType;
-  currentFolderId: string;
-  viewMode: ViewMode;
-  isImporting: boolean;
-  onRefresh: () => void;
-  onOpenSortModal: () => void;
-  onPickDocuments: () => void;
-}
+import { ToolbarProps } from "@/types/common";
 
 export default function FileListToolbar({
   activeTab,
   currentFolderId,
-  viewMode,
   isImporting,
   onRefresh,
   onOpenSortModal,
   onPickDocuments,
-}: FileListToolbarProps) {
+}: ToolbarProps) {
   return (
     <View style={styles.toolbar}>
       <View style={styles.toolbarLeft}>

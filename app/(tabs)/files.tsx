@@ -1,35 +1,113 @@
-import { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import SearchBar from "@/components/SearchBar";
-import FileListContainer from "@/components/FileListContainer";
-import { TabType, ViewMode } from "@/components/FileListToolbar";
-import { FileItem } from "@/components/FileList";
-import { SortOption, sortOptions } from "@/components/types";
-import ModalContainer from "@/components/ModalContainer";
+import { getFileList, importFile, deleteFile } from "@/utils/fileSystem";
+import { TabType } from "@/types/common";
+import { SortOption, sortOptions } from "@/types/sort";
+import SearchBar from "@/components/common/SearchBar";
+import FileListContainer from "@/components/file/FileListContainer";
+import { ModalContainer } from "@/components/common/Modal";
+import FileListItem from "@/components/file/FileListItem";
+import { FileItem } from "@/types/file";
 
 export default function FilesScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAddingFiles, setIsAddingFiles] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [files, setFiles] = useState<FileItem[]>([]);
-  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.LIST);
+  const [filteredFiles, setFilteredFiles] = useState<FileItem[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState("root");
   const [sortModalVisible, setSortModalVisible] = useState(false);
   const [sortOrder, setSortOrder] = useState<SortOption>(SortOption.NAME_ASC);
 
-  const onAddFile = () => {
+  useEffect(() => {
+    loadFiles();
+  }, []);
+
+  useEffect(() => {
+    // 검색어가 변경될 때마다 파일 필터링
+    if (searchQuery.trim() === "") {
+      setFilteredFiles(files);
+    } else {
+      const filtered = files.filter((file) =>
+        file.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredFiles(filtered);
+    }
+  }, [searchQuery, files]);
+
+  const loadFiles = async () => {
+    setIsLoading(true);
+    try {
+      const fileList = await getFileList();
+      setFiles(fileList);
+      setFilteredFiles(fileList);
+    } catch (error) {
+      console.error("파일 로딩 오류:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const onAddFile = async () => {
     setIsAddingFiles(true);
+    try {
+      const file = await importFile();
+      if (file) {
+        setFiles((prevFiles) => [...prevFiles, file]);
+        Alert.alert("성공", "파일이 성공적으로 추가되었습니다.");
+      }
+    } catch (error) {
+      console.error("파일 추가 오류:", error);
+      Alert.alert("오류", "파일을 추가하는 중 오류가 발생했습니다.");
+    } finally {
+      setIsAddingFiles(false);
+    }
   };
 
   const handleRefresh = () => {
-    // 새로고침 로직
+    loadFiles();
   };
 
-  const pickDocuments = () => {
+  const pickDocuments = async () => {
     setIsImporting(true);
-    // 문서 선택 로직
+    try {
+      await onAddFile();
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleDeleteFile = async (file: FileItem) => {
+    Alert.alert("파일 삭제", `"${file.name}" 파일을 삭제하시겠습니까?`, [
+      { text: "취소", style: "cancel" },
+      {
+        text: "삭제",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            const deleted = await deleteFile(file.uri);
+            if (deleted) {
+              setFiles((prevFiles) =>
+                prevFiles.filter((f) => f.id !== file.id)
+              );
+              Alert.alert("성공", "파일이 삭제되었습니다.");
+            }
+          } catch (error) {
+            console.error("파일 삭제 오류:", error);
+            Alert.alert("오류", "파일을 삭제하는 중 오류가 발생했습니다.");
+          }
+        },
+      },
+    ]);
   };
 
   const handleSortOptionSelect = (optionId: string) => {
@@ -42,13 +120,6 @@ export default function FilesScreen() {
           option.label.includes("오름차순")
             ? SortOption.NAME_ASC
             : SortOption.NAME_DESC
-        );
-        break;
-      case "date":
-        setSortOrder(
-          option.label.includes("오래된순")
-            ? SortOption.DATE_ASC
-            : SortOption.DATE_DESC
         );
         break;
       case "size":
@@ -66,15 +137,12 @@ export default function FilesScreen() {
   };
 
   const renderFileItem = (item: FileItem) => (
-    <View style={styles.fileItem}>
-      <Text>{item.name}</Text>
-    </View>
+    <FileListItem item={item} onLongPress={() => handleDeleteFile(item)} />
   );
 
   const toolbarProps = {
     activeTab: TabType.ALL_FILES,
     currentFolderId,
-    viewMode,
     isImporting,
     onRefresh: handleRefresh,
     onOpenSortModal: () => setSortModalVisible(true),
@@ -99,7 +167,7 @@ export default function FilesScreen() {
             onPress={() => handleSortOptionSelect(option.id)}
           >
             <FontAwesome
-              name={option.icon}
+              name={option.icon as keyof typeof FontAwesome.glyphMap}
               size={20}
               color={sortOrder.startsWith(option.id) ? "#FFFFFF" : "#007AFF"}
             />
@@ -118,11 +186,19 @@ export default function FilesScreen() {
     </ModalContainer>
   );
 
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
       <FileListContainer
-        data={files}
+        data={filteredFiles}
         renderItem={renderFileItem}
         isLoading={isLoading}
         isAddingFiles={isAddingFiles}
@@ -130,6 +206,7 @@ export default function FilesScreen() {
         showToolbar={true}
         toolbarProps={toolbarProps}
         sortOption={sortOrder}
+        emptyMessage={searchQuery ? "검색 결과가 없습니다" : "파일이 없습니다"}
       />
       <SortModal />
     </View>
@@ -141,10 +218,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F9F9F9",
   },
-  fileItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EFEFEF",
+  loadingContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   modalContainer: {
     padding: 20,

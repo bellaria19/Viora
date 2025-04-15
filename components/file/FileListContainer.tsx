@@ -1,7 +1,8 @@
 import { View, StyleSheet } from "react-native";
 import FileList, { FileItem } from "./FileList";
-import FileListToolbar, { TabType, ViewMode } from "./FileListToolbar";
-import { SortOption } from "./types";
+import FileListToolbar from "./FileListToolbar";
+import { SortOption } from "@/types/sort";
+import { ToolbarProps } from "@/types/common";
 
 interface FileListContainerProps {
   // FileList props
@@ -14,18 +15,7 @@ interface FileListContainerProps {
   sortOption?: SortOption;
   // Toolbar props
   showToolbar?: boolean;
-  toolbarProps?: {
-    activeTab: TabType;
-    currentFolderId: string;
-    viewMode: ViewMode;
-    isImporting: boolean;
-    onNavigateUp: () => void;
-    onRefresh: () => void;
-    onToggleViewMode: () => void;
-    onOpenSortModal: () => void;
-    onOpenFolderModal: () => void;
-    onPickDocuments: () => void;
-  };
+  toolbarProps?: ToolbarProps;
 }
 
 export default function FileListContainer({
