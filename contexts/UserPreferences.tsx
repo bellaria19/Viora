@@ -1,4 +1,3 @@
-// contexts/UserPreferences.tsx 파일 생성
 import { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SortOption } from '@/types/sort';
@@ -12,8 +11,9 @@ interface TextViewerSettings {
 
 interface PDFViewerSettings {
   viewMode: 'scroll' | 'page';
-  rotation: number;
+  // rotation: number;
   enableRTL: boolean;
+  showPageNumbers: boolean; // 추가: 페이지 번호 표시
 }
 
 interface ImageViewerSettings {
@@ -32,6 +32,7 @@ interface UserPreferences {
   // 앱 전체 설정
   darkMode: boolean;
   defaultSortOption: SortOption;
+  brightness: number;
 
   // 뷰어별 설정
   textViewer: TextViewerSettings;
@@ -52,10 +53,11 @@ interface UserPreferencesContextType {
 }
 
 // 기본 설정값 정의
-const defaultPreferences: UserPreferences = {
+export const defaultPreferences: UserPreferences = {
   // 앱 전체 설정 기본값
   darkMode: false,
   defaultSortOption: SortOption.NAME_ASC,
+  brightness: 100,
 
   // 뷰어별 설정 기본값
   textViewer: {
@@ -65,8 +67,9 @@ const defaultPreferences: UserPreferences = {
   },
   pdfViewer: {
     viewMode: 'scroll',
-    rotation: 0,
+    // rotation: 0,
     enableRTL: false,
+    showPageNumbers: true, // 추가: 기본값으로 페이지 번호 표시
   },
   imageViewer: {
     defaultZoom: 1.0,

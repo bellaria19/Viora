@@ -17,6 +17,8 @@ const defaultPreferences = {
     defaultZoom: 1.0,
     pageSpacing: 8,
     showPageNumbers: true,
+    viewMode: 'scroll',
+    enableRTL: false,
   },
   imageViewer: {
     defaultZoom: 1.0,
@@ -62,9 +64,9 @@ const createStyles = (theme: Theme) =>
     },
   });
 
-export default function SettingsScreen() {
-  const { preferences, setDarkMode } = useUserPreferences();
+export default function TabSettingsScreen() {
   const theme = useTheme();
+  const { preferences, setDarkMode, updatePDFViewerSettings } = useUserPreferences();
   const styles = createStyles(theme);
 
   const [preferencesState, setPreferencesState] = useState(defaultPreferences);
@@ -174,7 +176,55 @@ export default function SettingsScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <SettingsSection title="앱 설정">
+        <SettingsItem
+          icon="moon-o"
+          iconColor="#007AFF"
+          title="다크 모드"
+          subtitle="어두운 테마로 전환"
+          right={
+            <Switch
+              value={preferences.darkMode}
+              onValueChange={(value) => setDarkMode(value)}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={preferences.darkMode ? '#007AFF' : '#f4f3f4'}
+            />
+          }
+        />
+      </SettingsSection>
+
+      <SettingsSection title="PDF 뷰어 설정">
+        <SettingsItem
+          icon="file-pdf-o"
+          iconColor="#FF3B30"
+          title="보기 모드"
+          subtitle={preferences.pdfViewer.viewMode === 'scroll' ? '스크롤 모드' : '페이지 모드'}
+          right={
+            <Switch
+              value={preferences.pdfViewer.viewMode === 'page'}
+              onValueChange={(value) => updatePDFViewerSettings({ viewMode: value ? 'page' : 'scroll' })}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={preferences.pdfViewer.viewMode === 'page' ? '#007AFF' : '#f4f3f4'}
+            />
+          }
+        />
+        <SettingsItem
+          icon="align-right"
+          iconColor="#5856D6"
+          title="RTL 모드"
+          subtitle="오른쪽에서 왼쪽으로 읽기"
+          right={
+            <Switch
+              value={preferences.pdfViewer.enableRTL}
+              onValueChange={(value) => updatePDFViewerSettings({ enableRTL: value })}
+              trackColor={{ false: '#767577', true: '#81b0ff' }}
+              thumbColor={preferences.pdfViewer.enableRTL ? '#007AFF' : '#f4f3f4'}
+            />
+          }
+        />
+      </SettingsSection>
+
       <SettingsSection title="텍스트 뷰어 설정">
         <SettingsItem
           icon="font"
@@ -208,39 +258,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 글꼴 선택 모달 표시 */
           }}
-        />
-      </SettingsSection>
-
-      <SettingsSection title="PDF 뷰어 설정">
-        <SettingsItem
-          icon="search"
-          iconColor="#FF3B30"
-          title="기본 확대 배율"
-          subtitle={`${preferencesState.pdfViewer.defaultZoom}x`}
-          onPress={() => {
-            /* 확대 배율 설정 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="arrows-v"
-          iconColor="#AF52DE"
-          title="페이지 간격"
-          subtitle={`${preferencesState.pdfViewer.pageSpacing}px`}
-          onPress={() => {
-            /* 페이지 간격 설정 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="file-pdf-o"
-          iconColor="#FF9500"
-          title="페이지 번호 표시"
-          right={
-            <Switch
-              value={preferencesState.pdfViewer.showPageNumbers}
-              onValueChange={handlePdfShowPageNumbers}
-              trackColor={{ false: '#D1D1D6', true: '#007AFF' }}
-            />
-          }
         />
       </SettingsSection>
 
@@ -313,16 +330,6 @@ export default function SettingsScreen() {
           onPress={resetPreferences}
         />
       </SettingsSection>
-
-      <View style={styles.settingItem}>
-        <Text style={styles.settingLabel}>다크 모드</Text>
-        <Switch
-          value={preferences.darkMode}
-          onValueChange={setDarkMode}
-          trackColor={{ false: '#767577', true: theme.colors.primary }}
-          thumbColor={preferences.darkMode ? '#ffffff' : '#f4f3f4'}
-        />
-      </View>
 
       <View style={styles.versionContainer}>
         <Text style={styles.versionText}>파일 뷰어 앱 v{appVersion}</Text>

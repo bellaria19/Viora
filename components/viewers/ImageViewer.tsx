@@ -1,4 +1,4 @@
-import { View, Image, TouchableOpacity, StyleSheet, Dimensions, FlatList } from 'react-native';
+import { View, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import ViewerOverlay from '@/components/common/ViewerOverlay';
@@ -13,7 +13,6 @@ export default function ImageViewer({ fileUri, fileName = '이미지 파일', im
   const images = propImages && propImages.length > 0 ? propImages : [fileUri];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [overlayVisible, setOverlayVisible] = useState(true);
-  const [viewMode, setViewMode] = useState<'scroll' | 'page'>('page');
   const navigation = useNavigation();
 
   const goToPrevPage = () => {
@@ -28,10 +27,6 @@ export default function ImageViewer({ fileUri, fileName = '이미지 파일', im
     if (page >= 1 && page <= images.length) setCurrentIndex(page - 1);
   };
 
-  const handleModeChange = (mode: 'scroll' | 'page') => {
-    setViewMode(mode);
-  };
-
   const handleBack = () => {
     if (navigation && navigation.canGoBack && navigation.canGoBack()) {
       navigation.goBack();
@@ -43,36 +38,6 @@ export default function ImageViewer({ fileUri, fileName = '이미지 파일', im
   };
 
   const handleToggleOverlay = () => setOverlayVisible((v) => !v);
-
-  if (viewMode === 'scroll') {
-    return (
-      <View style={styles.imageContainer}>
-        <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={handleToggleOverlay}>
-          <FlatList
-            data={images}
-            renderItem={({ item }) => <Image source={{ uri: item }} style={styles.image} resizeMode="contain" />}
-            keyExtractor={(item, idx) => item + idx}
-            pagingEnabled={false}
-            horizontal={false}
-            showsVerticalScrollIndicator={true}
-          />
-          <ViewerOverlay
-            fileName={fileName}
-            currentPage={currentIndex + 1}
-            totalPages={images.length}
-            onBack={handleBack}
-            onPrevPage={goToPrevPage}
-            onNextPage={goToNextPage}
-            visible={overlayVisible}
-            onToggle={handleToggleOverlay}
-            onPageChange={handlePageChange}
-            mode={viewMode}
-            onModeChange={handleModeChange}
-          />
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <View style={styles.imageContainer}>
@@ -88,8 +53,6 @@ export default function ImageViewer({ fileUri, fileName = '이미지 파일', im
           visible={overlayVisible}
           onToggle={handleToggleOverlay}
           onPageChange={handlePageChange}
-          mode={viewMode}
-          onModeChange={handleModeChange}
         />
       </TouchableOpacity>
     </View>
