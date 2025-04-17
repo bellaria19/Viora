@@ -9,7 +9,6 @@ import {
   UserPreferencesProvider,
   useUserPreferences,
 } from "@/contexts/UserPreferences";
-import { useColorScheme } from "react-native";
 import {
   DarkTheme,
   DefaultTheme,
@@ -21,7 +20,6 @@ SplashScreen.preventAutoHideAsync();
 
 function NavigationRoot() {
   const { preferences } = useUserPreferences();
-  const colorScheme = useColorScheme();
   const theme = preferences.darkMode ? DarkTheme : DefaultTheme;
 
   return (

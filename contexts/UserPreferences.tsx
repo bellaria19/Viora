@@ -3,25 +3,78 @@ import { createContext, useState, useContext, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SortOption } from "@/types/sort";
 
+// 각 뷰어별 설정 인터페이스 정의
+interface TextViewerSettings {
+  fontSize: number;
+  fontFamily: string;
+  theme: "light" | "dark" | "sepia";
+}
+
+interface PDFViewerSettings {
+  defaultZoom: number;
+  pageSpacing: number;
+}
+
+interface ImageViewerSettings {
+  defaultZoom: number;
+  enableDoubleTapZoom: boolean;
+}
+
+interface EPUBViewerSettings {
+  fontSize: number;
+  fontFamily: string;
+  theme: "light" | "dark" | "sepia";
+}
+
+// 전체 사용자 설정 인터페이스
 interface UserPreferences {
+  // 앱 전체 설정
   darkMode: boolean;
-  showThumbnails: boolean;
   defaultSortOption: SortOption;
+
+  // 뷰어별 설정
+  textViewer: TextViewerSettings;
+  pdfViewer: PDFViewerSettings;
+  imageViewer: ImageViewerSettings;
+  epubViewer: EPUBViewerSettings;
 }
 
 interface UserPreferencesContextType {
   preferences: UserPreferences;
   setDarkMode: (value: boolean) => void;
-  setShowThumbnails: (value: boolean) => void;
   setDefaultSortOption: (value: SortOption) => void;
+  updateTextViewerSettings: (settings: Partial<TextViewerSettings>) => void;
+  updatePDFViewerSettings: (settings: Partial<PDFViewerSettings>) => void;
+  updateImageViewerSettings: (settings: Partial<ImageViewerSettings>) => void;
+  updateEPUBViewerSettings: (settings: Partial<EPUBViewerSettings>) => void;
   isLoading: boolean;
-  defaultSortOption: SortOption;
 }
 
+// 기본 설정값 정의
 const defaultPreferences: UserPreferences = {
+  // 앱 전체 설정 기본값
   darkMode: false,
-  showThumbnails: true,
   defaultSortOption: SortOption.NAME_ASC,
+
+  // 뷰어별 설정 기본값
+  textViewer: {
+    fontSize: 16,
+    fontFamily: "System",
+    theme: "light",
+  },
+  pdfViewer: {
+    defaultZoom: 1.0,
+    pageSpacing: 8,
+  },
+  imageViewer: {
+    defaultZoom: 1.0,
+    enableDoubleTapZoom: true,
+  },
+  epubViewer: {
+    fontSize: 16,
+    fontFamily: "System",
+    theme: "light",
+  },
 };
 
 const UserPreferencesContext = createContext<UserPreferencesContextType | null>(
@@ -38,9 +91,13 @@ export const useUserPreferences = () => {
   return context;
 };
 
-export const UserPreferencesProvider: React.FC<{
+interface UserPreferencesProviderProps {
   children: React.ReactNode;
-}> = ({ children }) => {
+}
+
+export const UserPreferencesProvider = ({
+  children,
+}: UserPreferencesProviderProps) => {
   const [preferences, setPreferences] =
     useState<UserPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,14 +130,9 @@ export const UserPreferencesProvider: React.FC<{
     }
   };
 
+  // 앱 전체 설정 업데이트 함수
   const setDarkMode = (value: boolean) => {
     const newPreferences = { ...preferences, darkMode: value };
-    setPreferences(newPreferences);
-    savePreferences(newPreferences);
-  };
-
-  const setShowThumbnails = (value: boolean) => {
-    const newPreferences = { ...preferences, showThumbnails: value };
     setPreferences(newPreferences);
     savePreferences(newPreferences);
   };
@@ -91,15 +143,56 @@ export const UserPreferencesProvider: React.FC<{
     savePreferences(newPreferences);
   };
 
+  // 뷰어별 설정 업데이트 함수
+  const updateTextViewerSettings = (settings: Partial<TextViewerSettings>) => {
+    const newPreferences = {
+      ...preferences,
+      textViewer: { ...preferences.textViewer, ...settings },
+    };
+    setPreferences(newPreferences);
+    savePreferences(newPreferences);
+  };
+
+  const updatePDFViewerSettings = (settings: Partial<PDFViewerSettings>) => {
+    const newPreferences = {
+      ...preferences,
+      pdfViewer: { ...preferences.pdfViewer, ...settings },
+    };
+    setPreferences(newPreferences);
+    savePreferences(newPreferences);
+  };
+
+  const updateImageViewerSettings = (
+    settings: Partial<ImageViewerSettings>
+  ) => {
+    const newPreferences = {
+      ...preferences,
+      imageViewer: { ...preferences.imageViewer, ...settings },
+    };
+    setPreferences(newPreferences);
+    savePreferences(newPreferences);
+  };
+
+  const updateEPUBViewerSettings = (settings: Partial<EPUBViewerSettings>) => {
+    const newPreferences = {
+      ...preferences,
+      epubViewer: { ...preferences.epubViewer, ...settings },
+    };
+    setPreferences(newPreferences);
+    savePreferences(newPreferences);
+  };
+
   return (
     <UserPreferencesContext.Provider
       value={{
         preferences,
         setDarkMode,
-        setShowThumbnails,
         setDefaultSortOption,
+        updateTextViewerSettings,
+        updatePDFViewerSettings,
+        updateImageViewerSettings,
+        updateEPUBViewerSettings,
         isLoading,
-        defaultSortOption: preferences.defaultSortOption,
       }}
     >
       {children}

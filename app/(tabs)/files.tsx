@@ -20,8 +20,7 @@ import { useUserPreferences } from "@/contexts/UserPreferences";
 import { useTheme } from "@react-navigation/native";
 
 export default function FilesScreen() {
-  const { preferences, defaultSortOption, setDefaultSortOption } =
-    useUserPreferences();
+  const { preferences, setDefaultSortOption } = useUserPreferences();
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +31,9 @@ export default function FilesScreen() {
   const [filteredFiles, setFilteredFiles] = useState<FileItem[]>([]);
   const [currentFolderId, setCurrentFolderId] = useState("root");
   const [sortModalVisible, setSortModalVisible] = useState(false);
-  const [sortOrder, setSortOrder] = useState<SortOption>(defaultSortOption);
+  const [sortOrder, setSortOrder] = useState<SortOption>(
+    preferences.defaultSortOption
+  );
 
   useEffect(() => {
     loadFiles();

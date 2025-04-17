@@ -1,17 +1,11 @@
-import {
-  View,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  Switch,
-  ScrollView,
-} from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { View, StyleSheet, Text, Switch, ScrollView } from "react-native";
 import { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system";
 import * as Application from "expo-application";
 import { useUserPreferences } from "@/contexts/UserPreferences";
 import { useTheme } from "@react-navigation/native";
+import SettingsSection from "@/components/settings/SettingsSection";
+import SettingsItem from "@/components/settings/SettingsItem";
 
 // settings.tsx에서 임시로 사용할 설정 값
 const defaultPreferences = {
@@ -35,57 +29,6 @@ const defaultPreferences = {
     fontFamily: "시스템 기본",
   },
 };
-
-type SettingsSectionProps = {
-  title: string;
-  children: React.ReactNode;
-};
-
-const SettingsSection = ({
-  title,
-  children,
-  styles,
-}: SettingsSectionProps & { styles: any }) => (
-  <View style={styles.section}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    <View style={styles.sectionContent}>{children}</View>
-  </View>
-);
-
-type SettingsItemProps = {
-  icon: keyof typeof FontAwesome.glyphMap;
-  iconColor?: string;
-  title: string;
-  subtitle?: string;
-  right?: React.ReactNode;
-  onPress?: () => void;
-};
-
-const SettingsItem = ({
-  icon,
-  iconColor = "#007AFF",
-  title,
-  subtitle,
-  right,
-  onPress,
-  styles,
-}: SettingsItemProps & { styles: any }) => (
-  <TouchableOpacity style={styles.item} onPress={onPress} disabled={!onPress}>
-    <View style={[styles.itemIcon, { backgroundColor: `${iconColor}20` }]}>
-      <FontAwesome name={icon} size={20} color={iconColor} />
-    </View>
-    <View style={styles.itemContent}>
-      <Text style={styles.itemTitle}>{title}</Text>
-      {subtitle && <Text style={styles.itemSubtitle}>{subtitle}</Text>}
-    </View>
-    <View style={styles.itemRight}>
-      {right ||
-        (onPress && (
-          <FontAwesome name="chevron-right" size={20} color="#C7C7CC" />
-        ))}
-    </View>
-  </TouchableOpacity>
-);
 
 export default function SettingsScreen() {
   const { preferences, setDarkMode } = useUserPreferences();
@@ -214,66 +157,6 @@ export default function SettingsScreen() {
       backgroundColor: theme.colors.background,
       padding: 16,
     },
-    section: {
-      backgroundColor: theme.colors.card,
-      borderRadius: 12,
-      padding: 16,
-      marginBottom: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: "600",
-      color: theme.colors.text,
-      marginBottom: 16,
-    },
-    sectionContent: {
-      backgroundColor: theme.colors.card,
-      borderRadius: 10,
-      marginHorizontal: 16,
-      overflow: "hidden",
-    },
-    item: {
-      flexDirection: "row",
-      alignItems: "center",
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.colors.border,
-    },
-    itemIcon: {
-      width: 36,
-      height: 36,
-      borderRadius: 8,
-      justifyContent: "center",
-      alignItems: "center",
-      marginRight: 12,
-    },
-    itemContent: {
-      flex: 1,
-    },
-    itemTitle: {
-      fontSize: 16,
-      fontWeight: "400",
-      color: theme.colors.text,
-    },
-    itemSubtitle: {
-      fontSize: 14,
-      color: theme.colors.text,
-      opacity: 0.6,
-      marginTop: 2,
-    },
-    itemRight: {
-      marginLeft: 12,
-    },
-    versionContainer: {
-      alignItems: "center",
-      marginVertical: 20,
-    },
-    versionText: {
-      fontSize: 14,
-      color: theme.colors.text,
-      opacity: 0.6,
-    },
     settingItem: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -288,11 +171,20 @@ export default function SettingsScreen() {
       fontSize: 16,
       color: theme.colors.text,
     },
+    versionContainer: {
+      alignItems: "center",
+      marginVertical: 20,
+    },
+    versionText: {
+      fontSize: 14,
+      color: theme.colors.text,
+      opacity: 0.6,
+    },
   });
 
   return (
     <ScrollView style={styles.container}>
-      <SettingsSection title="텍스트 뷰어 설정" styles={styles}>
+      <SettingsSection title="텍스트 뷰어 설정">
         <SettingsItem
           icon="font"
           iconColor="#34C759"
@@ -301,7 +193,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 글꼴 크기 설정 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="paint-brush"
@@ -317,7 +208,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 테마 선택 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="text-width"
@@ -327,11 +217,10 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 글꼴 선택 모달 표시 */
           }}
-          styles={styles}
         />
       </SettingsSection>
 
-      <SettingsSection title="PDF 뷰어 설정" styles={styles}>
+      <SettingsSection title="PDF 뷰어 설정">
         <SettingsItem
           icon="search"
           iconColor="#FF3B30"
@@ -340,7 +229,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 확대 배율 설정 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="arrows-v"
@@ -350,7 +238,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 페이지 간격 설정 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="file-pdf-o"
@@ -363,11 +250,10 @@ export default function SettingsScreen() {
               trackColor={{ false: "#D1D1D6", true: "#007AFF" }}
             />
           }
-          styles={styles}
         />
       </SettingsSection>
 
-      <SettingsSection title="이미지 뷰어 설정" styles={styles}>
+      <SettingsSection title="이미지 뷰어 설정">
         <SettingsItem
           icon="search-plus"
           iconColor="#5856D6"
@@ -376,7 +262,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 확대 배율 설정 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="hand-o-up"
@@ -389,11 +274,10 @@ export default function SettingsScreen() {
               trackColor={{ false: "#D1D1D6", true: "#007AFF" }}
             />
           }
-          styles={styles}
         />
       </SettingsSection>
 
-      <SettingsSection title="EPUB 뷰어 설정" styles={styles}>
+      <SettingsSection title="EPUB 뷰어 설정">
         <SettingsItem
           icon="font"
           iconColor="#FF3B30"
@@ -402,7 +286,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 글꼴 크기 설정 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="paint-brush"
@@ -418,7 +301,6 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 테마 선택 모달 표시 */
           }}
-          styles={styles}
         />
         <SettingsItem
           icon="text-width"
@@ -428,18 +310,16 @@ export default function SettingsScreen() {
           onPress={() => {
             /* 글꼴 선택 모달 표시 */
           }}
-          styles={styles}
         />
       </SettingsSection>
 
-      <SettingsSection title="일반 설정" styles={styles}>
+      <SettingsSection title="일반 설정">
         <SettingsItem
           icon="refresh"
           iconColor="#8E8E93"
           title="설정 초기화"
           subtitle="모든 뷰어 설정을 기본값으로 되돌립니다"
           onPress={resetPreferences}
-          styles={styles}
         />
       </SettingsSection>
 

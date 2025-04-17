@@ -25,6 +25,10 @@ interface ViewerOverlayProps {
   onModeChange?: (mode: "scroll" | "page") => void;
 }
 
+const { width, height } = Dimensions.get("window");
+const TOUCH_AREA_HEIGHT = height * 0.7; // 화면 높이의 70%
+const TOUCH_AREA_Y_OFFSET = (height - TOUCH_AREA_HEIGHT) / 2; // 중앙 정렬을 위한 Y 오프셋
+
 export default function ViewerOverlay({
   fileName,
   currentPage,
@@ -51,7 +55,13 @@ export default function ViewerOverlay({
         activeOpacity={1}
         style={styles.overlayTouchable}
         onPress={onToggle}
-      />
+      >
+        {visible && (
+          <View style={styles.touchArea}>
+            <Text style={styles.touchGuideText}>터치하여 메뉴 숨기기</Text>
+          </View>
+        )}
+      </TouchableOpacity>
       {/* 상단 오버레이 - SafeAreaView로 감쌈 */}
       <SafeAreaView style={styles.safeTop} edges={["top"]}>
         <View style={styles.topOverlay} pointerEvents="box-none">
@@ -61,6 +71,12 @@ export default function ViewerOverlay({
           <Text style={styles.fileName} numberOfLines={1}>
             {fileName}
           </Text>
+          <TouchableOpacity
+            style={styles.settingIconButton}
+            onPress={() => setSettingVisible(true)}
+          >
+            <FontAwesome name="cog" size={24} color="#fff" />
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
       {/* 하단 오버레이 */}
@@ -103,15 +119,6 @@ export default function ViewerOverlay({
             />
           </View>
         )}
-        {/* 3. 뷰어 설정 버튼 */}
-        <View style={styles.settingRow}>
-          <TouchableOpacity
-            style={styles.settingIconButton}
-            onPress={() => setSettingVisible(true)}
-          >
-            <FontAwesome name="cog" size={28} color="#fff" />
-          </TouchableOpacity>
-        </View>
       </View>
       {/* 설정 모달 */}
       <Modal
@@ -172,12 +179,26 @@ export default function ViewerOverlay({
   );
 }
 
-const { width } = Dimensions.get("window");
-
 const styles = StyleSheet.create({
   overlayTouchable: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 10,
+  },
+  touchArea: {
+    position: "absolute",
+    width: width * 0.6,
+    height: TOUCH_AREA_HEIGHT,
+    top: TOUCH_AREA_Y_OFFSET,
+    left: width * 0.2,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  touchGuideText: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 16,
+    fontWeight: "500",
   },
   safeTop: {
     position: "absolute",
@@ -185,10 +206,10 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 20,
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   topOverlay: {
-    height: 56,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    height: 50,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
@@ -234,9 +255,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   settingIconButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 4,
+    padding: 8,
+    marginLeft: 8,
   },
   pageButtonArea: {
     padding: 8,
