@@ -5,7 +5,7 @@ import * as FileSystem from 'expo-file-system';
 import Pdf from 'react-native-pdf';
 import ViewerOverlay from '@/components/common/ViewerOverlay';
 import { FontAwesome } from '@expo/vector-icons';
-import { useUserPreferences } from '@/contexts/UserPreferences';
+import { useUserPreferences, defaultPreferences } from '@/contexts/UserPreferences';
 
 interface PDFViewerProps {
   fileUri: string;
@@ -22,20 +22,8 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
   const pdfRef = useRef<any>(null);
   const navigation = useNavigation();
 
-  // 기본 PDF 뷰어 설정
-  const defaultPDFSettings = {
-    viewMode: 'scroll' as const,
-    pageSpacing: 8,
-    enableRTL: false,
-  };
-
   // 현재 설정 (preferences가 로드되지 않았을 때는 기본값 사용)
-  const currentSettings = preferencesLoading
-    ? defaultPDFSettings
-    : {
-        ...defaultPDFSettings,
-        ...preferences?.pdfViewer,
-      };
+  const currentSettings = preferencesLoading ? defaultPreferences.pdfViewer : preferences.pdfViewer;
 
   useEffect(() => {
     const checkFileExists = async () => {
@@ -98,10 +86,6 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
     }
   };
 
-  const handleModeChange = (mode: 'scroll' | 'page') => {
-    updatePDFViewerSettings({ viewMode: mode });
-  };
-
   const handleBack = () => {
     if (navigation && navigation.canGoBack && navigation.canGoBack()) {
       navigation.goBack();
@@ -113,10 +97,6 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
   };
 
   const handleToggleOverlay = () => setOverlayVisible((v) => !v);
-
-  const handleRTLChange = (enabled: boolean) => {
-    updatePDFViewerSettings({ enableRTL: enabled });
-  };
 
   return (
     <View style={styles.pdfContainer}>
@@ -157,10 +137,9 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
           visible={overlayVisible}
           onToggle={handleToggleOverlay}
           onPageChange={handlePageChange}
-          mode={currentSettings.viewMode}
-          onModeChange={handleModeChange}
-          enableRTL={currentSettings.enableRTL}
-          onRTLChange={handleRTLChange}
+          viewerType={'pdf'}
+          options={currentSettings}
+          onOptionsChange={updatePDFViewerSettings}
         />
       </TouchableOpacity>
     </View>

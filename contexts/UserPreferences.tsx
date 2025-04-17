@@ -1,31 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SortOption } from '@/types/sort';
-
-// 각 뷰어별 설정 인터페이스 정의
-interface TextViewerSettings {
-  fontSize: number;
-  fontFamily: string;
-  theme: 'light' | 'dark' | 'sepia';
-}
-
-interface PDFViewerSettings {
-  viewMode: 'scroll' | 'page';
-  // rotation: number;
-  enableRTL: boolean;
-  showPageNumbers: boolean; // 추가: 페이지 번호 표시
-}
-
-interface ImageViewerSettings {
-  defaultZoom: number;
-  enableDoubleTapZoom: boolean;
-}
-
-interface EPUBViewerSettings {
-  fontSize: number;
-  fontFamily: string;
-  theme: 'light' | 'dark' | 'sepia';
-}
+import { TextViewerOptions, ImageViewerOptions, PDFViewerOptions, EPUBViewerOptions } from '@/types/option';
 
 // 전체 사용자 설정 인터페이스
 interface UserPreferences {
@@ -35,20 +11,20 @@ interface UserPreferences {
   brightness: number;
 
   // 뷰어별 설정
-  textViewer: TextViewerSettings;
-  pdfViewer: PDFViewerSettings;
-  imageViewer: ImageViewerSettings;
-  epubViewer: EPUBViewerSettings;
+  textViewer: TextViewerOptions;
+  pdfViewer: PDFViewerOptions;
+  imageViewer: ImageViewerOptions;
+  epubViewer: EPUBViewerOptions;
 }
 
 interface UserPreferencesContextType {
   preferences: UserPreferences;
   setDarkMode: (value: boolean) => void;
   setDefaultSortOption: (value: SortOption) => void;
-  updateTextViewerSettings: (settings: Partial<TextViewerSettings>) => void;
-  updatePDFViewerSettings: (settings: Partial<PDFViewerSettings>) => void;
-  updateImageViewerSettings: (settings: Partial<ImageViewerSettings>) => void;
-  updateEPUBViewerSettings: (settings: Partial<EPUBViewerSettings>) => void;
+  updateTextViewerSettings: (settings: Partial<TextViewerOptions>) => void;
+  updatePDFViewerSettings: (settings: Partial<PDFViewerOptions>) => void;
+  updateImageViewerSettings: (settings: Partial<ImageViewerOptions>) => void;
+  updateEPUBViewerSettings: (settings: Partial<EPUBViewerOptions>) => void;
   isLoading: boolean;
 }
 
@@ -62,23 +38,50 @@ export const defaultPreferences: UserPreferences = {
   // 뷰어별 설정 기본값
   textViewer: {
     fontSize: 16,
+    lineHeight: 1.5,
     fontFamily: 'System',
     theme: 'light',
+    textColor: '#000000',
+    backgroundColor: '#ffffff',
+    marginHorizontal: 10,
+    marginVertical: 10,
   },
   pdfViewer: {
     viewMode: 'scroll',
     // rotation: 0,
     enableRTL: false,
-    showPageNumbers: true, // 추가: 기본값으로 페이지 번호 표시
+    pageSpacing: 8,
+    // showPageNumbers: true, // 추가: 기본값으로 페이지 번호 표시
   },
   imageViewer: {
-    defaultZoom: 1.0,
+    // defaultZoom: 1.0,
     enableDoubleTapZoom: true,
+    enablePreload: true,
+    enableCache: true,
+    showLoadingIndicator: true,
+    showFallbackImage: true,
+    showOverlay: true,
+    loadingIndicatorColor: '#0000ff',
+    loadingBackgroundColor: 'rgba(0, 0, 0, 0.3)',
+    imagePriority: 'normal',
   },
   epubViewer: {
+    viewMode: 'scroll',
+    enableRTL: false,
     fontSize: 16,
     fontFamily: 'System',
+    lineHeight: 1.5,
     theme: 'light',
+    textColor: '#000000',
+    backgroundColor: '#ffffff',
+    marginHorizontal: 10,
+    marginVertical: 10,
+    linkColor: '#0000ff',
+    enableTOC: true,
+    enableAnnotation: true,
+    enableBookmark: true,
+    enableSearch: true,
+    enableTextSelection: true,
   },
 };
 
@@ -139,7 +142,7 @@ export const UserPreferencesProvider = ({ children }: UserPreferencesProviderPro
   };
 
   // 뷰어별 설정 업데이트 함수
-  const updateTextViewerSettings = (settings: Partial<TextViewerSettings>) => {
+  const updateTextViewerSettings = (settings: Partial<TextViewerOptions>) => {
     const newPreferences = {
       ...preferences,
       textViewer: { ...preferences.textViewer, ...settings },
@@ -148,7 +151,7 @@ export const UserPreferencesProvider = ({ children }: UserPreferencesProviderPro
     savePreferences(newPreferences);
   };
 
-  const updatePDFViewerSettings = (settings: Partial<PDFViewerSettings>) => {
+  const updatePDFViewerSettings = (settings: Partial<PDFViewerOptions>) => {
     const newPreferences = {
       ...preferences,
       pdfViewer: { ...preferences.pdfViewer, ...settings },
@@ -157,7 +160,7 @@ export const UserPreferencesProvider = ({ children }: UserPreferencesProviderPro
     savePreferences(newPreferences);
   };
 
-  const updateImageViewerSettings = (settings: Partial<ImageViewerSettings>) => {
+  const updateImageViewerSettings = (settings: Partial<ImageViewerOptions>) => {
     const newPreferences = {
       ...preferences,
       imageViewer: { ...preferences.imageViewer, ...settings },
@@ -166,7 +169,7 @@ export const UserPreferencesProvider = ({ children }: UserPreferencesProviderPro
     savePreferences(newPreferences);
   };
 
-  const updateEPUBViewerSettings = (settings: Partial<EPUBViewerSettings>) => {
+  const updateEPUBViewerSettings = (settings: Partial<EPUBViewerOptions>) => {
     const newPreferences = {
       ...preferences,
       epubViewer: { ...preferences.epubViewer, ...settings },
