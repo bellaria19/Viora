@@ -11,8 +11,9 @@ interface TextViewerSettings {
 }
 
 interface PDFViewerSettings {
-  defaultZoom: number;
-  pageSpacing: number;
+  viewMode: 'scroll' | 'page';
+  rotation: number;
+  enableRTL: boolean;
 }
 
 interface ImageViewerSettings {
@@ -63,8 +64,9 @@ const defaultPreferences: UserPreferences = {
     theme: 'light',
   },
   pdfViewer: {
-    defaultZoom: 1.0,
-    pageSpacing: 8,
+    viewMode: 'scroll',
+    rotation: 0,
+    enableRTL: false,
   },
   imageViewer: {
     defaultZoom: 1.0,

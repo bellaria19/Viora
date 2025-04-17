@@ -4,6 +4,8 @@ import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
 import Pdf from 'react-native-pdf';
 import ViewerOverlay from '@/components/common/ViewerOverlay';
+import { FontAwesome } from '@expo/vector-icons';
+import { useUserPreferences } from '@/contexts/UserPreferences';
 
 interface PDFViewerProps {
   fileUri: string;
@@ -11,7 +13,7 @@ interface PDFViewerProps {
 }
 
 export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewerProps) {
-  const [viewMode, setViewMode] = useState<'scroll' | 'page'>('scroll');
+  const { preferences, updatePDFViewerSettings, isLoading: preferencesLoading } = useUserPreferences();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,6 +21,21 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
   const [overlayVisible, setOverlayVisible] = useState(true);
   const pdfRef = useRef<any>(null);
   const navigation = useNavigation();
+
+  // 기본 PDF 뷰어 설정
+  const defaultPDFSettings = {
+    viewMode: 'scroll' as const,
+    pageSpacing: 8,
+    enableRTL: false,
+  };
+
+  // 현재 설정 (preferences가 로드되지 않았을 때는 기본값 사용)
+  const currentSettings = preferencesLoading
+    ? defaultPDFSettings
+    : {
+        ...defaultPDFSettings,
+        ...preferences?.pdfViewer,
+      };
 
   useEffect(() => {
     const checkFileExists = async () => {
@@ -52,6 +69,15 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
     );
   }
 
+  if (preferencesLoading) {
+    return (
+      <View style={styles.loadingOverlay}>
+        <ActivityIndicator size="large" color="#007AFF" />
+        <Text style={styles.loadingText}>설정을 불러오는 중...</Text>
+      </View>
+    );
+  }
+
   const source = { uri: fileUri, cache: true };
 
   const goToPrevPage = () => {
@@ -73,7 +99,7 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
   };
 
   const handleModeChange = (mode: 'scroll' | 'page') => {
-    setViewMode(mode);
+    updatePDFViewerSettings({ viewMode: mode });
   };
 
   const handleBack = () => {
@@ -87,6 +113,10 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
   };
 
   const handleToggleOverlay = () => setOverlayVisible((v) => !v);
+
+  const handleRTLChange = (enabled: boolean) => {
+    updatePDFViewerSettings({ enableRTL: enabled });
+  };
 
   return (
     <View style={styles.pdfContainer}>
@@ -105,9 +135,11 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
           onError={() => {
             setError('PDF를 불러오는 중 오류가 발생했습니다.');
           }}
-          enablePaging={viewMode === 'page'}
-          horizontal={viewMode === 'page'}
-          spacing={viewMode === 'page' ? 10 : 0}
+          enablePaging={currentSettings.viewMode === 'page'}
+          horizontal={currentSettings.viewMode === 'page'}
+          spacing={currentSettings.pageSpacing}
+          enableRTL={currentSettings.enableRTL}
+          enableAnnotationRendering={true}
         />
         {isLoading && (
           <View style={styles.loadingOverlay}>
@@ -125,8 +157,10 @@ export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewe
           visible={overlayVisible}
           onToggle={handleToggleOverlay}
           onPageChange={handlePageChange}
-          mode={viewMode}
+          mode={currentSettings.viewMode}
           onModeChange={handleModeChange}
+          enableRTL={currentSettings.enableRTL}
+          onRTLChange={handleRTLChange}
         />
       </TouchableOpacity>
     </View>

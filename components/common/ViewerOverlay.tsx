@@ -16,6 +16,8 @@ interface ViewerOverlayProps {
   onPageChange?: (page: number) => void;
   mode?: 'scroll' | 'page';
   onModeChange?: (mode: 'scroll' | 'page') => void;
+  enableRTL?: boolean;
+  onRTLChange?: (enabled: boolean) => void;
 }
 
 const { width, height } = Dimensions.get('window');
@@ -34,6 +36,8 @@ export default function ViewerOverlay({
   onPageChange,
   mode = 'scroll',
   onModeChange,
+  enableRTL,
+  onRTLChange,
 }: ViewerOverlayProps) {
   const [settingVisible, setSettingVisible] = useState(false);
   if (!visible) return null;
@@ -60,9 +64,11 @@ export default function ViewerOverlay({
           <Text style={styles.fileName} numberOfLines={1}>
             {fileName}
           </Text>
-          <TouchableOpacity style={styles.settingIconButton} onPress={() => setSettingVisible(true)}>
-            <FontAwesome name="cog" size={24} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.topButtons}>
+            <TouchableOpacity style={styles.iconButton} onPress={() => setSettingVisible(true)}>
+              <FontAwesome name="cog" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
       {/* 하단 오버레이 */}
@@ -104,24 +110,57 @@ export default function ViewerOverlay({
       <Modal visible={settingVisible} transparent animationType="fade" onRequestClose={() => setSettingVisible(false)}>
         <TouchableOpacity style={styles.modalBackground} activeOpacity={1} onPress={() => setSettingVisible(false)}>
           <View style={styles.settingModal}>
-            <Text style={styles.settingTitle}>뷰어 모드 선택</Text>
-            <TouchableOpacity
-              style={[styles.modeOption, mode === 'scroll' && styles.selectedMode]}
-              onPress={() => {
-                onModeChange && onModeChange('scroll');
-                setSettingVisible(false);
-              }}
-            >
-              <Text style={[styles.modeOptionText, mode === 'scroll' && styles.selectedModeText]}>스크롤 모드</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modeOption, mode === 'page' && styles.selectedMode]}
-              onPress={() => {
-                onModeChange && onModeChange('page');
-                setSettingVisible(false);
-              }}
-            >
-              <Text style={[styles.modeOptionText, mode === 'page' && styles.selectedModeText]}>페이지 모드</Text>
+            <Text style={styles.settingTitle}>PDF 뷰어 설정</Text>
+
+            {/* 뷰어 모드 설정 */}
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>뷰어 모드</Text>
+              <View style={styles.settingOptions}>
+                <TouchableOpacity
+                  style={[styles.modeOption, mode === 'scroll' && styles.selectedMode]}
+                  onPress={() => {
+                    onModeChange && onModeChange('scroll');
+                  }}
+                >
+                  <FontAwesome name="arrows-v" size={20} color={mode === 'scroll' ? '#fff' : '#333'} />
+                  <Text style={[styles.modeOptionText, mode === 'scroll' && styles.selectedModeText]}>스크롤 모드</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modeOption, mode === 'page' && styles.selectedMode]}
+                  onPress={() => {
+                    onModeChange && onModeChange('page');
+                  }}
+                >
+                  <FontAwesome name="book" size={20} color={mode === 'page' ? '#fff' : '#333'} />
+                  <Text style={[styles.modeOptionText, mode === 'page' && styles.selectedModeText]}>페이지 모드</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* RTL 설정 */}
+            <View style={styles.settingSection}>
+              <Text style={styles.settingSectionTitle}>RTL (오른쪽에서 왼쪽) 모드</Text>
+              <View style={styles.settingOptions}>
+                <TouchableOpacity
+                  style={[styles.rtlOption, enableRTL && styles.selectedMode]}
+                  onPress={() => {
+                    onRTLChange && onRTLChange(!enableRTL);
+                  }}
+                >
+                  <FontAwesome
+                    name={enableRTL ? 'align-right' : 'align-left'}
+                    size={20}
+                    color={enableRTL ? '#fff' : '#333'}
+                  />
+                  <Text style={[styles.rtlOptionText, enableRTL && styles.selectedModeText]}>
+                    {enableRTL ? 'RTL 모드 켜짐' : 'RTL 모드 꺼짐'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <TouchableOpacity style={styles.closeButton} onPress={() => setSettingVisible(false)}>
+              <Text style={styles.closeButtonText}>닫기</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
@@ -241,13 +280,27 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: '#222',
   },
-  modeOption: {
+  settingSection: {
     width: '100%',
+    marginBottom: 20,
+  },
+  settingSectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  settingOptions: {
+    width: '100%',
+  },
+  modeOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 8,
     marginBottom: 8,
     backgroundColor: '#f0f0f0',
-    alignItems: 'center',
   },
   selectedMode: {
     backgroundColor: '#007AFF',
@@ -255,15 +308,44 @@ const styles = StyleSheet.create({
   modeOptionText: {
     fontSize: 16,
     color: '#333',
+    marginLeft: 12,
   },
   selectedModeText: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: '500',
   },
-  disabledButton: {
-    opacity: 0.4,
+  rtlOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
   },
-  disabledButtonText: {
-    color: '#aaa',
+  rtlOptionText: {
+    fontSize: 16,
+    color: '#333',
+    marginLeft: 12,
+  },
+  closeButton: {
+    width: '100%',
+    paddingVertical: 12,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: '#007AFF',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  topButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    padding: 8,
+    marginLeft: 8,
   },
 });
