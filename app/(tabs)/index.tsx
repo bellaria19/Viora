@@ -7,7 +7,7 @@ import FileListContainer from "@/components/file/FileListContainer";
 import { SortOption } from "@/types/sort";
 import { useTheme } from "@react-navigation/native";
 import { useUserPreferences } from "@/contexts/UserPreferences";
-// import { router } from "expo-router"; // Deprecated: 자동 열기 기능 제거
+import { router } from "expo-router";
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -33,17 +33,6 @@ export default function HomeScreen() {
   useEffect(() => {
     loadRecentFiles();
   }, []);
-
-  // Deprecated: 마지막으로 열었던 파일 자동 열기 기능 제거 (2024-03-26)
-  // useEffect(() => {
-  //   if (
-  //     preferences.autoOpenLastFile &&
-  //     preferences.lastOpenedFileId &&
-  //     !isLoading
-  //   ) {
-  //     router.push(`/(viewer)?id=${preferences.lastOpenedFileId}`);
-  //   }
-  // }, [preferences.autoOpenLastFile, preferences.lastOpenedFileId, isLoading]);
 
   const loadRecentFiles = async () => {
     if (!isRefreshing) {

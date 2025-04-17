@@ -88,11 +88,11 @@ const SettingsItem = ({
 );
 
 export default function SettingsScreen() {
-  const { preferences, setDarkMode, setAutoOpenLastFile } =
-    useUserPreferences();
+  const { preferences, setDarkMode } = useUserPreferences();
   const theme = useTheme();
-  const [preferencesState, setPreferences] = useState(defaultPreferences);
-  const appVersion = Application.nativeApplicationVersion || "1.0.0";
+  const [preferencesState, setPreferencesState] = useState(defaultPreferences);
+  const [cacheSize, setCacheSize] = useState<string>("계산 중...");
+  const [appVersion, setAppVersion] = useState<string>("알 수 없음");
 
   // 설정 파일 경로
   const PREFERENCES_FILE = FileSystem.documentDirectory + "preferences.json";
@@ -104,7 +104,7 @@ export default function SettingsScreen() {
       if (fileInfo.exists) {
         const data = await FileSystem.readAsStringAsync(PREFERENCES_FILE);
         const savedPreferences = JSON.parse(data);
-        setPreferences(savedPreferences);
+        setPreferencesState(savedPreferences);
       } else {
         // 파일이 없으면 기본값 저장
         await savePreferences(defaultPreferences);
@@ -121,7 +121,7 @@ export default function SettingsScreen() {
         PREFERENCES_FILE,
         JSON.stringify(newPreferences)
       );
-      setPreferences(newPreferences);
+      setPreferencesState(newPreferences);
     } catch (error) {
       console.error("설정 저장 오류:", error);
     }
@@ -433,20 +433,6 @@ export default function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="일반 설정" styles={styles}>
-        <SettingsItem
-          icon="file"
-          iconColor="#007AFF"
-          title="마지막 파일 자동 열기"
-          subtitle="앱 시작 시 마지막으로 열었던 파일을 자동으로 엽니다"
-          right={
-            <Switch
-              value={preferences.autoOpenLastFile}
-              onValueChange={setAutoOpenLastFile}
-              trackColor={{ false: "#D1D1D6", true: "#007AFF" }}
-            />
-          }
-          styles={styles}
-        />
         <SettingsItem
           icon="refresh"
           iconColor="#8E8E93"

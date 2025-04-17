@@ -12,14 +12,12 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import FileTypeHandler from "@/components/file/FileTypeHandler";
 import * as FileSystem from "expo-file-system";
-import { useUserPreferences } from "@/contexts/UserPreferences";
 
 export default function FileViewerScreen() {
   const { id } = useLocalSearchParams();
   const [fileUri, setFileUri] = useState<string | null>(null);
   const [fileType, setFileType] = useState<string>("application/octet-stream");
   const [loading, setLoading] = useState(true);
-  const { setLastOpenedFileId } = useUserPreferences();
 
   useEffect(() => {
     if (id) {
@@ -30,9 +28,6 @@ export default function FileViewerScreen() {
       const extension = String(id).split(".").pop()?.toLowerCase() || "";
       const mimeType = getMimeType(extension);
       setFileType(mimeType);
-
-      // 마지막으로 열어본 파일 ID 저장
-      setLastOpenedFileId(String(id));
 
       setLoading(false);
     } else {
