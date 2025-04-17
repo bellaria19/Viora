@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-import { WebView } from "react-native-webview";
+import { StyleSheet } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 interface EPUBViewerProps {
   fileUri: string;

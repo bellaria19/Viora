@@ -1,6 +1,6 @@
-import { View, TextInput, StyleSheet, Platform } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
+import { View, TextInput, StyleSheet, Platform } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { useTheme, Theme } from '@react-navigation/native';
 
 interface SearchBarProps {
   value: string;
@@ -8,25 +8,19 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export default function SearchBar({
-  value,
-  onChangeText,
-  placeholder = "파일 검색...",
-}: SearchBarProps) {
-  const theme = useTheme();
-
-  const styles = StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     searchContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      backgroundColor: theme.dark ? theme.colors.card : "#F2F2F7",
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.dark ? theme.colors.card : '#F2F2F7',
       borderRadius: 10,
       margin: 12,
       paddingHorizontal: 12,
       height: 44,
       ...Platform.select({
         ios: {
-          shadowColor: "#000",
+          shadowColor: '#000',
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.1,
           shadowRadius: 3,
@@ -39,8 +33,8 @@ export default function SearchBar({
     searchIconContainer: {
       width: 30,
       height: 30,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       marginRight: 8,
     },
     searchInput: {
@@ -52,15 +46,19 @@ export default function SearchBar({
     },
   });
 
+export default function SearchBar({ value, onChangeText, placeholder = '파일 검색...' }: SearchBarProps) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <View style={styles.searchContainer}>
       <View style={styles.searchIconContainer}>
-        <FontAwesome name="search" size={16} color={theme.colors.text + "80"} />
+        <FontAwesome name="search" size={16} color={theme.colors.text + '80'} />
       </View>
       <TextInput
         style={styles.searchInput}
         placeholder={placeholder}
-        placeholderTextColor={theme.colors.text + "80"}
+        placeholderTextColor={theme.colors.text + '80'}
         value={value}
         onChangeText={onChangeText}
         clearButtonMode="while-editing"

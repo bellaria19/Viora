@@ -1,14 +1,6 @@
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-  ActivityIndicator,
-} from "react-native";
-import { useEffect, useState } from "react";
-import * as FileSystem from "expo-file-system";
+import { View, Text, Image, StyleSheet, Dimensions, FlatList, ActivityIndicator } from 'react-native';
+import { useEffect, useState } from 'react';
+import * as FileSystem from 'expo-file-system';
 
 interface ZipViewerProps {
   fileUri: string;
@@ -38,12 +30,7 @@ export default function ZipViewer({ fileUri }: ZipViewerProps) {
 
         const imageFiles = files.filter((file) => {
           const ext = file.toLowerCase();
-          return (
-            ext.endsWith(".jpg") ||
-            ext.endsWith(".jpeg") ||
-            ext.endsWith(".png") ||
-            ext.endsWith(".gif")
-          );
+          return ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.png') || ext.endsWith('.gif');
         });
 
         const imagePaths = imageFiles.map((file) => `${tempDir}${file}`);
@@ -51,8 +38,8 @@ export default function ZipViewer({ fileUri }: ZipViewerProps) {
 
         await FileSystem.deleteAsync(tempDir, { idempotent: true });
       } catch (err) {
-        console.error("이미지 로딩 오류:", err);
-        setError("이미지를 불러오는 중 오류가 발생했습니다.");
+        console.error('이미지 로딩 오류:', err);
+        setError('이미지를 불러오는 중 오류가 발생했습니다.');
       } finally {
         setLoading(false);
       }
@@ -66,7 +53,7 @@ export default function ZipViewer({ fileUri }: ZipViewerProps) {
           const tempDir = `${FileSystem.cacheDirectory}temp_${Date.now()}/`;
           await FileSystem.deleteAsync(tempDir, { idempotent: true });
         } catch (error) {
-          console.error("임시 파일 정리 오류:", error);
+          console.error('임시 파일 정리 오류:', error);
         }
       };
       cleanup();
@@ -120,47 +107,47 @@ export default function ZipViewer({ fileUri }: ZipViewerProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   imageContainer: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
-    justifyContent: "center",
-    alignItems: "center",
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
-    resizeMode: "contain",
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    resizeMode: 'contain',
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: "#666666",
+    color: '#666666',
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   errorText: {
     fontSize: 16,
-    color: "#FF3B30",
-    textAlign: "center",
+    color: '#FF3B30',
+    textAlign: 'center',
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   emptyText: {
     fontSize: 16,
-    color: "#666666",
+    color: '#666666',
   },
 });

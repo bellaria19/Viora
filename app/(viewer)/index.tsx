@@ -1,22 +1,14 @@
-import { useLocalSearchParams, Stack, router } from "expo-router";
-import { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-  Share,
-} from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import FileTypeHandler from "@/components/file/FileTypeHandler";
-import * as FileSystem from "expo-file-system";
+import { useLocalSearchParams, Stack, router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Share } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import FileTypeHandler from '@/components/file/FileTypeHandler';
+import * as FileSystem from 'expo-file-system';
 
 export default function FileViewerScreen() {
   const { id } = useLocalSearchParams();
   const [fileUri, setFileUri] = useState<string | null>(null);
-  const [fileType, setFileType] = useState<string>("application/octet-stream");
+  const [fileType, setFileType] = useState<string>('application/octet-stream');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,30 +17,30 @@ export default function FileViewerScreen() {
       setFileUri(uri);
 
       // 파일 타입 추정
-      const extension = String(id).split(".").pop()?.toLowerCase() || "";
+      const extension = String(id).split('.').pop()?.toLowerCase() || '';
       const mimeType = getMimeType(extension);
       setFileType(mimeType);
 
       setLoading(false);
     } else {
-      Alert.alert("오류", "파일을 찾을 수 없습니다.");
+      Alert.alert('오류', '파일을 찾을 수 없습니다.');
       router.back();
     }
   }, [id]);
 
   const getMimeType = (extension: string): string => {
     const mimeTypes: Record<string, string> = {
-      txt: "text/plain",
-      jpg: "image/jpeg",
-      jpeg: "image/jpeg",
-      png: "image/png",
-      gif: "image/gif",
-      pdf: "application/pdf",
-      epub: "application/epub+zip",
-      zip: "application/zip",
+      txt: 'text/plain',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      png: 'image/png',
+      gif: 'image/gif',
+      pdf: 'application/pdf',
+      epub: 'application/epub+zip',
+      zip: 'application/zip',
     };
 
-    return mimeTypes[extension] || "application/octet-stream";
+    return mimeTypes[extension] || 'application/octet-stream';
   };
 
   const handleShare = async () => {
@@ -59,8 +51,8 @@ export default function FileViewerScreen() {
           title: `공유: ${id}`,
         });
       } catch (error) {
-        console.error("파일 공유 오류:", error);
-        Alert.alert("오류", "파일을 공유하는 중 오류가 발생했습니다.");
+        console.error('파일 공유 오류:', error);
+        Alert.alert('오류', '파일을 공유하는 중 오류가 발생했습니다.');
       }
     }
   };
@@ -101,23 +93,23 @@ export default function FileViewerScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: '#FFFFFF',
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   errorText: {
     fontSize: 16,
-    color: "#FF3B30",
-    textAlign: "center",
+    color: '#FF3B30',
+    textAlign: 'center',
   },
   shareButton: {
     padding: 10,

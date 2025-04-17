@@ -1,14 +1,7 @@
-import {
-  View,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  FlatList,
-} from "react-native";
-import { useState } from "react";
-import { useNavigation } from "@react-navigation/native";
-import ViewerOverlay from "@/components/common/ViewerOverlay";
+import { View, Image, TouchableOpacity, StyleSheet, Dimensions, FlatList } from 'react-native';
+import { useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import ViewerOverlay from '@/components/common/ViewerOverlay';
 
 interface ImageViewerProps {
   fileUri: string;
@@ -16,15 +9,11 @@ interface ImageViewerProps {
   images?: string[];
 }
 
-export default function ImageViewer({
-  fileUri,
-  fileName = "이미지 파일",
-  images: propImages,
-}: ImageViewerProps) {
+export default function ImageViewer({ fileUri, fileName = '이미지 파일', images: propImages }: ImageViewerProps) {
   const images = propImages && propImages.length > 0 ? propImages : [fileUri];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [overlayVisible, setOverlayVisible] = useState(true);
-  const [viewMode, setViewMode] = useState<"scroll" | "page">("page");
+  const [viewMode, setViewMode] = useState<'scroll' | 'page'>('page');
   const navigation = useNavigation();
 
   const goToPrevPage = () => {
@@ -39,39 +28,29 @@ export default function ImageViewer({
     if (page >= 1 && page <= images.length) setCurrentIndex(page - 1);
   };
 
-  const handleModeChange = (mode: "scroll" | "page") => {
+  const handleModeChange = (mode: 'scroll' | 'page') => {
     setViewMode(mode);
   };
 
   const handleBack = () => {
     if (navigation && navigation.canGoBack && navigation.canGoBack()) {
       navigation.goBack();
-    } else if (typeof window !== "undefined" && window.history) {
+    } else if (typeof window !== 'undefined' && window.history) {
       window.history.back();
     } else {
-      alert("뒤로가기 기능을 구현하세요.");
+      alert('뒤로가기 기능을 구현하세요.');
     }
   };
 
   const handleToggleOverlay = () => setOverlayVisible((v) => !v);
 
-  if (viewMode === "scroll") {
+  if (viewMode === 'scroll') {
     return (
       <View style={styles.imageContainer}>
-        <TouchableOpacity
-          activeOpacity={1}
-          style={{ flex: 1 }}
-          onPress={handleToggleOverlay}
-        >
+        <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={handleToggleOverlay}>
           <FlatList
             data={images}
-            renderItem={({ item }) => (
-              <Image
-                source={{ uri: item }}
-                style={styles.image}
-                resizeMode="contain"
-              />
-            )}
+            renderItem={({ item }) => <Image source={{ uri: item }} style={styles.image} resizeMode="contain" />}
             keyExtractor={(item, idx) => item + idx}
             pagingEnabled={false}
             horizontal={false}
@@ -97,16 +76,8 @@ export default function ImageViewer({
 
   return (
     <View style={styles.imageContainer}>
-      <TouchableOpacity
-        activeOpacity={1}
-        style={{ flex: 1 }}
-        onPress={handleToggleOverlay}
-      >
-        <Image
-          source={{ uri: images[currentIndex] }}
-          style={styles.image}
-          resizeMode="contain"
-        />
+      <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={handleToggleOverlay}>
+        <Image source={{ uri: images[currentIndex] }} style={styles.image} resizeMode="contain" />
         <ViewerOverlay
           fileName={fileName}
           currentPage={currentIndex + 1}
@@ -127,14 +98,14 @@ export default function ImageViewer({
 
 const styles = StyleSheet.create({
   imageContainer: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
-    justifyContent: "center",
-    alignItems: "center",
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
-    width: Dimensions.get("window").width,
-    height: Dimensions.get("window").height,
-    resizeMode: "contain",
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    resizeMode: 'contain',
   },
 });

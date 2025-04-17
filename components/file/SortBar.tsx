@@ -1,27 +1,18 @@
-import { View, TouchableOpacity, StyleSheet, Text } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
-import { SortOption, sortOptions } from "@/types/sort";
+import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { useTheme, Theme } from '@react-navigation/native';
+import { SortOption, sortOptions } from '@/types/sort';
 
 interface SortToolbarProps {
   onOpenSortModal: () => void;
   sortOption: SortOption;
 }
 
-export default function SortToolbar({
-  onOpenSortModal,
-  sortOption,
-}: SortToolbarProps) {
-  const theme = useTheme();
-
-  // 현재 선택된 정렬 옵션의 라벨 찾기
-  const currentSortLabel =
-    sortOptions.find((option) => option.id === sortOption)?.label || "정렬";
-
-  const styles = StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       paddingHorizontal: 16,
       paddingVertical: 8,
       backgroundColor: theme.colors.card,
@@ -29,8 +20,8 @@ export default function SortToolbar({
       borderBottomColor: theme.colors.border,
     },
     toolbarButton: {
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       padding: 8,
       marginHorizontal: 4,
     },
@@ -40,6 +31,13 @@ export default function SortToolbar({
       color: theme.colors.primary,
     },
   });
+
+export default function SortToolbar({ onOpenSortModal, sortOption }: SortToolbarProps) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
+  // 현재 선택된 정렬 옵션의 라벨 찾기
+  const currentSortLabel = sortOptions.find((option) => option.id === sortOption)?.label || '정렬';
 
   return (
     <View style={styles.container}>

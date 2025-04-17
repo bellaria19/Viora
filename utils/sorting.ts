@@ -1,10 +1,7 @@
-import { FileItem } from "@/types/file";
-import { SortOption } from "@/types/sort";
+import { FileItem } from '@/types/file';
+import { SortOption } from '@/types/sort';
 
-export function sortFiles(
-  files: FileItem[],
-  sortOption: SortOption
-): FileItem[] {
+export function sortFiles(files: FileItem[], sortOption: SortOption): FileItem[] {
   const sortedFiles = [...files];
 
   switch (sortOption) {

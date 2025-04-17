@@ -1,23 +1,21 @@
 // components/FileListItem.tsx 파일 생성
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { FileItem } from "@/types/file";
-import { router } from "expo-router";
-import { updateFileAccessTime } from "@/utils/fileSystem";
-import { useTheme } from "@react-navigation/native";
+import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { FileItem } from '@/types/file';
+import { router } from 'expo-router';
+import { updateFileAccessTime } from '@/utils/fileSystem';
+import { useTheme, Theme } from '@react-navigation/native';
 
 interface FileListItemProps {
   item: FileItem;
   onLongPress?: (item: FileItem) => void;
 }
 
-export default function FileListItem({ item, onLongPress }: FileListItemProps) {
-  const theme = useTheme();
-
-  const styles = StyleSheet.create({
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     container: {
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       backgroundColor: theme.colors.card,
       paddingVertical: 12,
       paddingHorizontal: 16,
@@ -27,60 +25,64 @@ export default function FileListItem({ item, onLongPress }: FileListItemProps) {
     iconContainer: {
       width: 40,
       height: 40,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       marginRight: 12,
     },
     infoContainer: {
       flex: 1,
-      justifyContent: "center",
+      justifyContent: 'center',
     },
     fileName: {
       fontSize: 16,
-      fontWeight: "500",
+      fontWeight: '500',
       marginBottom: 4,
       color: theme.colors.text,
     },
     detailsContainer: {
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
     },
     fileDetails: {
       fontSize: 13,
-      color: theme.colors.text + "80",
+      color: theme.colors.text + '80',
     },
     moreButton: {
       padding: 8,
     },
   });
 
+export default function FileListItem({ item, onLongPress }: FileListItemProps) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   const getFileIcon = (fileType: string): string => {
     // 파일 타입에 따라 적절한 아이콘 반환
     switch (fileType) {
-      case "text/plain":
-        return "file-text-o";
-      case "image/jpeg":
-      case "image/png":
-      case "image/gif":
-        return "file-image-o";
-      case "application/pdf":
-        return "file-pdf-o";
-      case "application/epub+zip":
-        return "book";
-      case "application/zip":
-      case "application/x-zip-compressed":
-        return "file-archive-o";
+      case 'text/plain':
+        return 'file-text-o';
+      case 'image/jpeg':
+      case 'image/png':
+      case 'image/gif':
+        return 'file-image-o';
+      case 'application/pdf':
+        return 'file-pdf-o';
+      case 'application/epub+zip':
+        return 'book';
+      case 'application/zip':
+      case 'application/x-zip-compressed':
+        return 'file-archive-o';
       default:
-        return "file-o";
+        return 'file-o';
     }
   };
 
   const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return "0 Bytes";
+    if (bytes === 0) return '0 Bytes';
     const k = 1024;
-    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
   //   const now = new Date();
   //   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -141,11 +143,7 @@ export default function FileListItem({ item, onLongPress }: FileListItemProps) {
         </View>
       </View>
       <TouchableOpacity style={styles.moreButton}>
-        <FontAwesome
-          name="ellipsis-v"
-          size={18}
-          color={theme.colors.text + "80"}
-        />
+        <FontAwesome name="ellipsis-v" size={18} color={theme.colors.text + '80'} />
       </TouchableOpacity>
     </TouchableOpacity>
   );

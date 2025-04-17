@@ -1,13 +1,13 @@
 // contexts/UserPreferences.tsx 파일 생성
-import { createContext, useState, useContext, useEffect } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { SortOption } from "@/types/sort";
+import { createContext, useState, useContext, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SortOption } from '@/types/sort';
 
 // 각 뷰어별 설정 인터페이스 정의
 interface TextViewerSettings {
   fontSize: number;
   fontFamily: string;
-  theme: "light" | "dark" | "sepia";
+  theme: 'light' | 'dark' | 'sepia';
 }
 
 interface PDFViewerSettings {
@@ -23,7 +23,7 @@ interface ImageViewerSettings {
 interface EPUBViewerSettings {
   fontSize: number;
   fontFamily: string;
-  theme: "light" | "dark" | "sepia";
+  theme: 'light' | 'dark' | 'sepia';
 }
 
 // 전체 사용자 설정 인터페이스
@@ -59,8 +59,8 @@ const defaultPreferences: UserPreferences = {
   // 뷰어별 설정 기본값
   textViewer: {
     fontSize: 16,
-    fontFamily: "System",
-    theme: "light",
+    fontFamily: 'System',
+    theme: 'light',
   },
   pdfViewer: {
     defaultZoom: 1.0,
@@ -72,21 +72,17 @@ const defaultPreferences: UserPreferences = {
   },
   epubViewer: {
     fontSize: 16,
-    fontFamily: "System",
-    theme: "light",
+    fontFamily: 'System',
+    theme: 'light',
   },
 };
 
-const UserPreferencesContext = createContext<UserPreferencesContextType | null>(
-  null
-);
+const UserPreferencesContext = createContext<UserPreferencesContextType | null>(null);
 
 export const useUserPreferences = () => {
   const context = useContext(UserPreferencesContext);
   if (!context) {
-    throw new Error(
-      "useUserPreferences must be used within a UserPreferencesProvider"
-    );
+    throw new Error('useUserPreferences must be used within a UserPreferencesProvider');
   }
   return context;
 };
@@ -95,11 +91,8 @@ interface UserPreferencesProviderProps {
   children: React.ReactNode;
 }
 
-export const UserPreferencesProvider = ({
-  children,
-}: UserPreferencesProviderProps) => {
-  const [preferences, setPreferences] =
-    useState<UserPreferences>(defaultPreferences);
+export const UserPreferencesProvider = ({ children }: UserPreferencesProviderProps) => {
+  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -108,12 +101,12 @@ export const UserPreferencesProvider = ({
 
   const loadPreferences = async () => {
     try {
-      const storedPreferences = await AsyncStorage.getItem("userPreferences");
+      const storedPreferences = await AsyncStorage.getItem('userPreferences');
       if (storedPreferences) {
         setPreferences(JSON.parse(storedPreferences));
       }
     } catch (error) {
-      console.error("사용자 설정을 불러오는데 실패했습니다:", error);
+      console.error('사용자 설정을 불러오는데 실패했습니다:', error);
     } finally {
       setIsLoading(false);
     }
@@ -121,12 +114,9 @@ export const UserPreferencesProvider = ({
 
   const savePreferences = async (newPreferences: UserPreferences) => {
     try {
-      await AsyncStorage.setItem(
-        "userPreferences",
-        JSON.stringify(newPreferences)
-      );
+      await AsyncStorage.setItem('userPreferences', JSON.stringify(newPreferences));
     } catch (error) {
-      console.error("사용자 설정을 저장하는데 실패했습니다:", error);
+      console.error('사용자 설정을 저장하는데 실패했습니다:', error);
     }
   };
 
@@ -162,9 +152,7 @@ export const UserPreferencesProvider = ({
     savePreferences(newPreferences);
   };
 
-  const updateImageViewerSettings = (
-    settings: Partial<ImageViewerSettings>
-  ) => {
+  const updateImageViewerSettings = (settings: Partial<ImageViewerSettings>) => {
     const newPreferences = {
       ...preferences,
       imageViewer: { ...preferences.imageViewer, ...settings },

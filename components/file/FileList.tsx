@@ -1,9 +1,8 @@
-import { View, StyleSheet, RefreshControl } from "react-native";
-import { FlashList } from "@shopify/flash-list";
-import EmptyComponent from "./EmptyFileList";
-import { SortOption } from "@/types/sort";
-import { FileItem } from "@/types/file";
-import { sortFiles } from "@/utils/sorting";
+import { FlashList } from '@shopify/flash-list';
+import EmptyComponent from './EmptyFileList';
+import { SortOption } from '@/types/sort';
+import { FileItem } from '@/types/file';
+import { sortFiles } from '@/utils/sorting';
 
 interface FileListProps {
   data: FileItem[];

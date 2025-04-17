@@ -1,27 +1,17 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  ActivityIndicator,
-} from "react-native";
-import { useEffect, useState, useRef } from "react";
-import { useNavigation } from "@react-navigation/native";
-import * as FileSystem from "expo-file-system";
-import Pdf from "react-native-pdf";
-import ViewerOverlay from "@/components/common/ViewerOverlay";
+import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import * as FileSystem from 'expo-file-system';
+import Pdf from 'react-native-pdf';
+import ViewerOverlay from '@/components/common/ViewerOverlay';
 
 interface PDFViewerProps {
   fileUri: string;
   fileName?: string;
 }
 
-export default function PDFViewer({
-  fileUri,
-  fileName = "PDF 파일",
-}: PDFViewerProps) {
-  const [viewMode, setViewMode] = useState<"scroll" | "page">("scroll");
+export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewerProps) {
+  const [viewMode, setViewMode] = useState<'scroll' | 'page'>('scroll');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,18 +25,19 @@ export default function PDFViewer({
       try {
         const fileInfo = await FileSystem.getInfoAsync(fileUri);
         if (!fileInfo.exists) {
-          setError("PDF 파일을 찾을 수 없습니다.");
+          setError('PDF 파일을 찾을 수 없습니다.');
           setIsLoading(false);
           return;
         }
         if (fileInfo.size === 0) {
-          setError("PDF 파일이 비어있습니다.");
+          setError('PDF 파일이 비어있습니다.');
           setIsLoading(false);
           return;
         }
         setIsLoading(false);
       } catch (err) {
-        setError("PDF 파일을 확인하는 중 오류가 발생했습니다.");
+        console.error(err);
+        setError('PDF 파일을 확인하는 중 오류가 발생했습니다.');
         setIsLoading(false);
       }
     };
@@ -81,17 +72,17 @@ export default function PDFViewer({
     }
   };
 
-  const handleModeChange = (mode: "scroll" | "page") => {
+  const handleModeChange = (mode: 'scroll' | 'page') => {
     setViewMode(mode);
   };
 
   const handleBack = () => {
     if (navigation && navigation.canGoBack && navigation.canGoBack()) {
       navigation.goBack();
-    } else if (typeof window !== "undefined" && window.history) {
+    } else if (typeof window !== 'undefined' && window.history) {
       window.history.back();
     } else {
-      alert("뒤로가기 기능을 구현하세요.");
+      alert('뒤로가기 기능을 구현하세요.');
     }
   };
 
@@ -99,11 +90,7 @@ export default function PDFViewer({
 
   return (
     <View style={styles.pdfContainer}>
-      <TouchableOpacity
-        activeOpacity={1}
-        style={{ flex: 1 }}
-        onPress={handleToggleOverlay}
-      >
+      <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={handleToggleOverlay}>
         <Pdf
           ref={pdfRef}
           source={source}
@@ -116,11 +103,11 @@ export default function PDFViewer({
             setCurrentPage(page);
           }}
           onError={() => {
-            setError("PDF를 불러오는 중 오류가 발생했습니다.");
+            setError('PDF를 불러오는 중 오류가 발생했습니다.');
           }}
-          enablePaging={viewMode === "page"}
-          horizontal={viewMode === "page"}
-          spacing={viewMode === "page" ? 10 : 0}
+          enablePaging={viewMode === 'page'}
+          horizontal={viewMode === 'page'}
+          spacing={viewMode === 'page' ? 10 : 0}
         />
         {isLoading && (
           <View style={styles.loadingOverlay}>
@@ -152,29 +139,29 @@ const styles = StyleSheet.create({
   },
   pdf: {
     flex: 1,
-    width: Dimensions.get("window").width,
-    backgroundColor: "#f8f8f8",
+    width: Dimensions.get('window').width,
+    backgroundColor: '#f8f8f8',
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: "#666666",
+    color: '#666666',
   },
   errorContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   errorText: {
     fontSize: 16,
-    color: "#FF3B30",
-    textAlign: "center",
+    color: '#FF3B30',
+    textAlign: 'center',
   },
 });

@@ -1,4 +1,4 @@
-import { SortOption } from "@/types/sort";
+import { SortOption } from '@/types/sort';
 
 export interface FileItem {
   id: string;

@@ -1,6 +1,6 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { useTheme, Theme } from '@react-navigation/native';
 
 export interface SettingsItemProps {
   icon: keyof typeof FontAwesome.glyphMap;
@@ -11,20 +11,12 @@ export interface SettingsItemProps {
   onPress?: () => void;
 }
 
-export default function SettingsItem({
-  icon,
-  iconColor = "#007AFF",
-  title,
-  subtitle,
-  right,
-  onPress,
-}: SettingsItemProps) {
-  const theme = useTheme();
-
-  const styles = StyleSheet.create({
+// 스타일 함수를 컴포넌트 외부로 분리
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
     item: {
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       paddingVertical: 12,
       paddingHorizontal: 16,
       borderBottomWidth: StyleSheet.hairlineWidth,
@@ -34,8 +26,8 @@ export default function SettingsItem({
       width: 36,
       height: 36,
       borderRadius: 8,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
       marginRight: 12,
     },
     itemContent: {
@@ -43,7 +35,7 @@ export default function SettingsItem({
     },
     itemTitle: {
       fontSize: 16,
-      fontWeight: "400",
+      fontWeight: '400',
       color: theme.colors.text,
     },
     itemSubtitle: {
@@ -57,6 +49,17 @@ export default function SettingsItem({
     },
   });
 
+export default function SettingsItem({
+  icon,
+  iconColor = '#007AFF',
+  title,
+  subtitle,
+  right,
+  onPress,
+}: SettingsItemProps) {
+  const theme = useTheme();
+  const styles = createStyles(theme);
+
   return (
     <TouchableOpacity style={styles.item} onPress={onPress} disabled={!onPress}>
       <View style={[styles.itemIcon, { backgroundColor: `${iconColor}20` }]}>
@@ -67,10 +70,7 @@ export default function SettingsItem({
         {subtitle && <Text style={styles.itemSubtitle}>{subtitle}</Text>}
       </View>
       <View style={styles.itemRight}>
-        {right ||
-          (onPress && (
-            <FontAwesome name="chevron-right" size={20} color="#C7C7CC" />
-          ))}
+        {right || (onPress && <FontAwesome name="chevron-right" size={20} color="#C7C7CC" />)}
       </View>
     </TouchableOpacity>
   );

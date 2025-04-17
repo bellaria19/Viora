@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet } from 'react-native';
 
 interface UnsupportedFileProps {
   fileType: string;
@@ -7,9 +7,7 @@ interface UnsupportedFileProps {
 export default function UnsupportedFile({ fileType }: UnsupportedFileProps) {
   return (
     <View style={styles.unsupportedContainer}>
-      <Text style={styles.unsupportedText}>
-        지원하지 않는 파일 형식입니다: {fileType}
-      </Text>
+      <Text style={styles.unsupportedText}>지원하지 않는 파일 형식입니다: {fileType}</Text>
     </View>
   );
 }
@@ -17,13 +15,13 @@ export default function UnsupportedFile({ fileType }: UnsupportedFileProps) {
 const styles = StyleSheet.create({
   unsupportedContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   unsupportedText: {
     fontSize: 16,
-    color: "#FF3B30",
-    textAlign: "center",
+    color: '#FF3B30',
+    textAlign: 'center',
   },
 });

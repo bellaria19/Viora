@@ -1,18 +1,17 @@
-import { View, StyleSheet, Text, Switch, ScrollView } from "react-native";
-import { useState, useEffect } from "react";
-import * as FileSystem from "expo-file-system";
-import * as Application from "expo-application";
-import { useUserPreferences } from "@/contexts/UserPreferences";
-import { useTheme } from "@react-navigation/native";
-import SettingsSection from "@/components/settings/SettingsSection";
-import SettingsItem from "@/components/settings/SettingsItem";
+import { View, StyleSheet, Text, Switch, ScrollView } from 'react-native';
+import { useState, useEffect } from 'react';
+import * as FileSystem from 'expo-file-system';
+import { useUserPreferences } from '@/contexts/UserPreferences';
+import { useTheme, Theme } from '@react-navigation/native';
+import SettingsSection from '@/components/settings/SettingsSection';
+import SettingsItem from '@/components/settings/SettingsItem';
 
 // settings.tsx에서 임시로 사용할 설정 값
 const defaultPreferences = {
   textViewer: {
     fontSize: 16,
-    theme: "light",
-    fontFamily: "시스템 기본",
+    theme: 'light',
+    fontFamily: '시스템 기본',
   },
   pdfViewer: {
     defaultZoom: 1.0,
@@ -25,20 +24,54 @@ const defaultPreferences = {
   },
   epubViewer: {
     fontSize: 18,
-    theme: "light",
-    fontFamily: "시스템 기본",
+    theme: 'light',
+    fontFamily: '시스템 기본',
   },
 };
+
+// 스타일 함수를 컴포넌트 외부로 분리
+const createStyles = (theme: Theme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+      padding: 16,
+    },
+    settingItem: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: 8,
+      backgroundColor: theme.colors.card,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      marginBottom: 16,
+    },
+    settingLabel: {
+      fontSize: 16,
+      color: theme.colors.text,
+    },
+    versionContainer: {
+      alignItems: 'center',
+      marginVertical: 20,
+    },
+    versionText: {
+      fontSize: 14,
+      color: theme.colors.text,
+      opacity: 0.6,
+    },
+  });
 
 export default function SettingsScreen() {
   const { preferences, setDarkMode } = useUserPreferences();
   const theme = useTheme();
+  const styles = createStyles(theme);
+
   const [preferencesState, setPreferencesState] = useState(defaultPreferences);
-  const [cacheSize, setCacheSize] = useState<string>("계산 중...");
-  const [appVersion, setAppVersion] = useState<string>("알 수 없음");
+  const [appVersion, setAppVersion] = useState<string>('알 수 없음');
 
   // 설정 파일 경로
-  const PREFERENCES_FILE = FileSystem.documentDirectory + "preferences.json";
+  const PREFERENCES_FILE = FileSystem.documentDirectory + 'preferences.json';
 
   // 설정 불러오기 함수
   const loadPreferences = async () => {
@@ -53,20 +86,17 @@ export default function SettingsScreen() {
         await savePreferences(defaultPreferences);
       }
     } catch (error) {
-      console.error("설정 불러오기 오류:", error);
+      console.error('설정 불러오기 오류:', error);
     }
   };
 
   // 설정 저장 함수
   const savePreferences = async (newPreferences: typeof defaultPreferences) => {
     try {
-      await FileSystem.writeAsStringAsync(
-        PREFERENCES_FILE,
-        JSON.stringify(newPreferences)
-      );
+      await FileSystem.writeAsStringAsync(PREFERENCES_FILE, JSON.stringify(newPreferences));
       setPreferencesState(newPreferences);
     } catch (error) {
-      console.error("설정 저장 오류:", error);
+      console.error('설정 저장 오류:', error);
     }
   };
 
@@ -76,9 +106,7 @@ export default function SettingsScreen() {
   }, []);
 
   // 텍스트 뷰어 설정 업데이트
-  const updateTextViewerPrefs = (
-    updates: Partial<typeof preferencesState.textViewer>
-  ) => {
+  const updateTextViewerPrefs = (updates: Partial<typeof preferencesState.textViewer>) => {
     const newPreferences = {
       ...preferencesState,
       textViewer: {
@@ -90,9 +118,7 @@ export default function SettingsScreen() {
   };
 
   // PDF 뷰어 설정 업데이트
-  const updatePdfViewerPrefs = (
-    updates: Partial<typeof preferencesState.pdfViewer>
-  ) => {
+  const updatePdfViewerPrefs = (updates: Partial<typeof preferencesState.pdfViewer>) => {
     const newPreferences = {
       ...preferencesState,
       pdfViewer: {
@@ -104,9 +130,7 @@ export default function SettingsScreen() {
   };
 
   // 이미지 뷰어 설정 업데이트
-  const updateImageViewerPrefs = (
-    updates: Partial<typeof preferencesState.imageViewer>
-  ) => {
+  const updateImageViewerPrefs = (updates: Partial<typeof preferencesState.imageViewer>) => {
     const newPreferences = {
       ...preferencesState,
       imageViewer: {
@@ -118,9 +142,7 @@ export default function SettingsScreen() {
   };
 
   // EPUB 뷰어 설정 업데이트
-  const updateEpubViewerPrefs = (
-    updates: Partial<typeof preferencesState.epubViewer>
-  ) => {
+  const updateEpubViewerPrefs = (updates: Partial<typeof preferencesState.epubViewer>) => {
     const newPreferences = {
       ...preferencesState,
       epubViewer: {
@@ -137,7 +159,7 @@ export default function SettingsScreen() {
   };
 
   // 텍스트 뷰어 테마 설정
-  const handleTextThemeChange = (theme: "light" | "dark" | "sepia") => {
+  const handleTextThemeChange = (theme: 'light' | 'dark' | 'sepia') => {
     updateTextViewerPrefs({ theme });
   };
 
@@ -150,37 +172,6 @@ export default function SettingsScreen() {
   const handleImageDoubleTapZoom = (enableDoubleTapZoom: boolean) => {
     updateImageViewerPrefs({ enableDoubleTapZoom });
   };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-      padding: 16,
-    },
-    settingItem: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      paddingVertical: 8,
-      backgroundColor: theme.colors.card,
-      paddingHorizontal: 16,
-      borderRadius: 12,
-      marginBottom: 16,
-    },
-    settingLabel: {
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    versionContainer: {
-      alignItems: "center",
-      marginVertical: 20,
-    },
-    versionText: {
-      fontSize: 14,
-      color: theme.colors.text,
-      opacity: 0.6,
-    },
-  });
 
   return (
     <ScrollView style={styles.container}>
@@ -199,11 +190,11 @@ export default function SettingsScreen() {
           iconColor="#5856D6"
           title="테마"
           subtitle={
-            preferencesState.textViewer.theme === "light"
-              ? "밝은 테마"
-              : preferencesState.textViewer.theme === "dark"
-              ? "어두운 테마"
-              : "세피아"
+            preferencesState.textViewer.theme === 'light'
+              ? '밝은 테마'
+              : preferencesState.textViewer.theme === 'dark'
+                ? '어두운 테마'
+                : '세피아'
           }
           onPress={() => {
             /* 테마 선택 모달 표시 */
@@ -247,7 +238,7 @@ export default function SettingsScreen() {
             <Switch
               value={preferencesState.pdfViewer.showPageNumbers}
               onValueChange={handlePdfShowPageNumbers}
-              trackColor={{ false: "#D1D1D6", true: "#007AFF" }}
+              trackColor={{ false: '#D1D1D6', true: '#007AFF' }}
             />
           }
         />
@@ -271,7 +262,7 @@ export default function SettingsScreen() {
             <Switch
               value={preferencesState.imageViewer.enableDoubleTapZoom}
               onValueChange={handleImageDoubleTapZoom}
-              trackColor={{ false: "#D1D1D6", true: "#007AFF" }}
+              trackColor={{ false: '#D1D1D6', true: '#007AFF' }}
             />
           }
         />
@@ -292,11 +283,11 @@ export default function SettingsScreen() {
           iconColor="#FF9500"
           title="테마"
           subtitle={
-            preferencesState.epubViewer.theme === "light"
-              ? "밝은 테마"
-              : preferencesState.epubViewer.theme === "dark"
-              ? "어두운 테마"
-              : "세피아"
+            preferencesState.epubViewer.theme === 'light'
+              ? '밝은 테마'
+              : preferencesState.epubViewer.theme === 'dark'
+                ? '어두운 테마'
+                : '세피아'
           }
           onPress={() => {
             /* 테마 선택 모달 표시 */
@@ -328,8 +319,8 @@ export default function SettingsScreen() {
         <Switch
           value={preferences.darkMode}
           onValueChange={setDarkMode}
-          trackColor={{ false: "#767577", true: theme.colors.primary }}
-          thumbColor={preferences.darkMode ? "#ffffff" : "#f4f3f4"}
+          trackColor={{ false: '#767577', true: theme.colors.primary }}
+          thumbColor={preferences.darkMode ? '#ffffff' : '#f4f3f4'}
         />
       </View>
 
