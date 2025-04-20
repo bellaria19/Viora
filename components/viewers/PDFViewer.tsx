@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import * as FileSystem from 'expo-file-system';
 import Pdf from 'react-native-pdf';
-import ViewerOverlay from '@/components/common/ViewerOverlay';
+import ViewerOverlay from '@/components/viewers/ViewerOverlay';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUserPreferences, defaultPreferences } from '@/contexts/UserPreferences';
 

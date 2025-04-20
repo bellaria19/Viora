@@ -2,9 +2,9 @@ import { View, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } fro
 import { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import FastImage from 'react-native-fast-image';
-import ViewerOverlay from '@/components/common/ViewerOverlay';
 import { ImageViewerOptions } from '@/types/option';
 import { useUserPreferences, defaultPreferences } from '@/contexts/UserPreferences';
+import ViewerOverlay from '@/components/viewers/ViewerOverlay';
 
 interface ImageViewerProps {
   fileUri: string;
@@ -99,13 +99,7 @@ export default function ImageViewer({
     }
   };
 
-  const handleToggleOverlay = () => {
-    if (options.showOverlay) {
-      setOverlayVisible((v) => !v);
-    }
-  };
-
-  const toggleSettings = () => setShowSettings((v) => !v);
+  const handleToggleOverlay = () => setOverlayVisible((v) => !v);
 
   // FastImage 설정
   const fastImageProps = {
@@ -138,22 +132,21 @@ export default function ImageViewer({
             <ActivityIndicator size="large" color={options.loadingIndicatorColor} />
           </View>
         )}
-        {options.showOverlay && (
-          <ViewerOverlay
-            fileName={fileName}
-            currentPage={currentIndex + 1}
-            totalPages={images.length}
-            onBack={handleBack}
-            onPrevPage={goToPrevPage}
-            onNextPage={goToNextPage}
-            visible={overlayVisible}
-            onToggle={handleToggleOverlay}
-            onPageChange={handlePageChange}
-            viewerType={'image'}
-            options={options}
-            onOptionsChange={handleOptionsChange}
-          />
-        )}
+
+        <ViewerOverlay
+          fileName={fileName}
+          currentPage={currentIndex + 1}
+          totalPages={images.length}
+          onBack={handleBack}
+          onPrevPage={goToPrevPage}
+          onNextPage={goToNextPage}
+          visible={overlayVisible}
+          onToggle={handleToggleOverlay}
+          onPageChange={handlePageChange}
+          viewerType={'image'}
+          options={options}
+          onOptionsChange={handleOptionsChange}
+        />
       </TouchableOpacity>
     </View>
   );

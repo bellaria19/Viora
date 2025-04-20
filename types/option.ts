@@ -10,7 +10,6 @@ export interface ImageViewerOptions {
   // 화면 표시 설정
   showLoadingIndicator: boolean;
   showFallbackImage: boolean;
-  showOverlay: boolean;
 
   // 스타일 설정
   loadingIndicatorColor: string;
@@ -26,16 +25,22 @@ export interface ImageViewerSettingsProps {
 }
 
 export interface PDFViewerOptions {
-  viewMode: 'scroll' | 'page';
-  enableRTL: boolean;
-  pageSpacing: number;
-  // showPageNumbers: boolean;
-  // rotation: number;
+  // 기능 설정
+  enablePaging: boolean;
+  enableDoubleTapZoom: boolean;
+
+  // 성능 설정
+  enableCache: boolean;
+
+  // 화면 표시 설정
+  showPageNumber: boolean;
+  showLoadingIndicator: boolean;
+  showThumbnails: boolean;
 }
 
 export interface PDFViewerSettingsProps {
   options: PDFViewerOptions;
-  onOptionsChange: (newOptions: Partial<PDFViewerOptions>) => void;
+  onOptionsChange: (options: Partial<PDFViewerOptions>) => void;
   onClose: () => void;
   visible: boolean;
 }

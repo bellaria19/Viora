@@ -2,7 +2,7 @@ import { useLocalSearchParams, Stack, router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Share } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import FileTypeHandler from '@/components/file/FileTypeHandler';
+import FileTypeHandler from '@/components/viewers/FileTypeHandler';
 import * as FileSystem from 'expo-file-system';
 
 export default function FileViewerScreen() {
