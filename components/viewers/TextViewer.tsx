@@ -1,42 +1,57 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, Text, TouchableWithoutFeedback } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import { useEffect, useState } from 'react';
+import ViewerOverlay from './ViewerOverlay';
+import { useNavigation } from '@react-navigation/native';
 
 interface TextViewerProps {
-  fileUri: string;
+  uri: string;
+  onSettings?: () => void;
 }
 
-export default function TextViewer({ fileUri }: TextViewerProps) {
-  const [content, setContent] = useState<string>('로딩 중...');
+export default function TextViewer({ uri, onSettings }: TextViewerProps) {
+  const [content, setContent] = useState<string>('');
+  const [overlayVisible, setOverlayVisible] = useState(false);
+  const navigation = useNavigation();
+
+  const loadTextContent = useCallback(async () => {
+    try {
+      const fileContent = await FileSystem.readAsStringAsync(uri);
+      setContent(fileContent);
+    } catch (error) {
+      console.error('Error reading text file:', error);
+      setContent('파일을 읽을 수 없습니다.');
+    }
+  }, [uri]);
 
   useEffect(() => {
-    const loadTextFile = async () => {
-      try {
-        const fileContent = await FileSystem.readAsStringAsync(fileUri);
-        setContent(fileContent);
-      } catch (error) {
-        console.error('텍스트 파일 읽기 오류:', error);
-        setContent('파일을 읽을 수 없습니다.');
-      }
-    };
-
-    loadTextFile();
-  }, [fileUri]);
+    loadTextContent();
+  }, [loadTextContent]);
 
   return (
-    <View style={styles.textContainer}>
-      <Text style={styles.textContent}>{content}</Text>
-    </View>
+    <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
+      <View style={styles.container}>
+        <ScrollView style={styles.scrollView}>
+          <Text style={styles.text}>{content}</Text>
+        </ScrollView>
+        <ViewerOverlay visible={overlayVisible} onBack={() => navigation.goBack()} onSettings={onSettings} />
+      </View>
+    </TouchableWithoutFeedback>
   );
 }
 
 const styles = StyleSheet.create({
-  textContainer: {
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  scrollView: {
     flex: 1,
     padding: 16,
   },
-  textContent: {
+  text: {
     fontSize: 16,
     lineHeight: 24,
+    color: '#333',
   },
 });

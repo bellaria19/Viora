@@ -10,14 +10,16 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.bellaria.viora"
+      "bundleIdentifier": "com.bellaria.viora",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "package": "com.bellaria.viora"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -44,7 +46,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "2ba09785-e5dc-42a5-a7cf-8ccbd24db789"
+        "projectId": "677763cf-c6f3-4e2c-9aef-8e37e68f44ea"
       }
     },
     "owner": "bellaria"

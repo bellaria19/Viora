@@ -1,171 +1,129 @@
-import { View, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { View, Image, StyleSheet, Dimensions, ActivityIndicator, TouchableWithoutFeedback } from 'react-native';
+import { GestureDetector, Gesture } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import ViewerOverlay from './ViewerOverlay';
 import { useNavigation } from '@react-navigation/native';
-import FastImage from 'react-native-fast-image';
-import { ImageViewerOptions } from '@/types/option';
-import { useUserPreferences, defaultPreferences } from '@/contexts/UserPreferences';
-import ViewerOverlay from '@/components/viewers/ViewerOverlay';
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const SPRING_CONFIG = {
+  damping: 20,
+  stiffness: 200,
+};
 
 interface ImageViewerProps {
-  fileUri: string;
-  fileName?: string;
-  images?: string[];
-  fallbackImage?: string;
-  resizeMode?: keyof typeof FastImage.resizeMode;
-  initialOptions?: Partial<ImageViewerOptions>;
-  onOptionsChange?: (options: ImageViewerOptions) => void;
+  uri: string;
+  onSettings?: () => void;
 }
 
-export default function ImageViewer({
-  fileUri,
-  fileName = '이미지 파일',
-  images: propImages,
-  fallbackImage = 'https://via.placeholder.com/400x400?text=이미지+로드+실패',
-  resizeMode = 'contain',
-  initialOptions,
-  onOptionsChange,
-}: ImageViewerProps) {
-  const { preferences, updateImageViewerSettings, isLoading: preferencesLoading } = useUserPreferences();
-  const [showSettings, setShowSettings] = useState(false);
-  const images = propImages && propImages.length > 0 ? propImages : [fileUri];
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [overlayVisible, setOverlayVisible] = useState(true);
+export default function ImageViewer({ uri }: ImageViewerProps) {
   const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState(false);
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const navigation = useNavigation();
 
-  // 현재 설정 (preferences가 로드되지 않았을 때는 기본값 사용)
-  const options = preferencesLoading
-    ? { ...defaultPreferences.imageViewer, ...initialOptions }
-    : { ...preferences.imageViewer, ...initialOptions };
+  // 제스처 상태값
+  const scale = useSharedValue(1);
+  const savedScale = useSharedValue(1);
+  const translateX = useSharedValue(0);
+  const savedTranslateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const savedTranslateY = useSharedValue(0);
 
-  const handleOptionsChange = (newOptions: Partial<ImageViewerOptions>) => {
-    const updatedOptions = { ...options, ...newOptions };
-    onOptionsChange?.(updatedOptions);
-    updateImageViewerSettings(newOptions);
-  };
+  // 핀치 제스처
+  const pinchGesture = Gesture.Pinch()
+    .onUpdate((e) => {
+      scale.value = savedScale.value * e.scale;
+    })
+    .onEnd(() => {
+      savedScale.value = scale.value;
+    });
 
-  // 이미지 프리로딩
-  useEffect(() => {
-    if (!options.enablePreload) return;
-
-    const preloadNextImage = () => {
-      if (currentIndex < images.length - 1) {
-        FastImage.preload([{ uri: images[currentIndex + 1] }]);
+  // 팬 제스처
+  const panGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      if (scale.value > 1) {
+        translateX.value = savedTranslateX.value + e.translationX;
+        translateY.value = savedTranslateY.value + e.translationY;
       }
-    };
+    })
+    .onEnd(() => {
+      savedTranslateX.value = translateX.value;
+      savedTranslateY.value = translateY.value;
 
-    preloadNextImage();
+      // 이미지가 화면 밖으로 너무 많이 벗어나지 않도록 조정
+      const maxTranslateX = (SCREEN_WIDTH * (scale.value - 1)) / 2;
+      const maxTranslateY = (SCREEN_HEIGHT * (scale.value - 1)) / 2;
 
-    // 컴포넌트 언마운트 시 메모리 정리
-    return () => {
-      if (options.enableCache) {
-        FastImage.clearMemoryCache();
+      if (Math.abs(translateX.value) > maxTranslateX) {
+        translateX.value = withSpring(Math.sign(translateX.value) * maxTranslateX, SPRING_CONFIG);
+        savedTranslateX.value = translateX.value;
       }
-    };
-  }, [currentIndex, images, options.enablePreload, options.enableCache]);
 
-  const goToPrevPage = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setIsLoading(true);
-      setLoadError(false);
-    }
-  };
+      if (Math.abs(translateY.value) > maxTranslateY) {
+        translateY.value = withSpring(Math.sign(translateY.value) * maxTranslateY, SPRING_CONFIG);
+        savedTranslateY.value = translateY.value;
+      }
+    });
 
-  const goToNextPage = () => {
-    if (currentIndex < images.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setIsLoading(true);
-      setLoadError(false);
-    }
-  };
+  // 더블 탭 제스처
+  const doubleTapGesture = Gesture.Tap()
+    .numberOfTaps(2)
+    .onStart(() => {
+      if (scale.value > 1) {
+        scale.value = withSpring(1, SPRING_CONFIG);
+        translateX.value = withSpring(0, SPRING_CONFIG);
+        translateY.value = withSpring(0, SPRING_CONFIG);
+        savedScale.value = 1;
+        savedTranslateX.value = 0;
+        savedTranslateY.value = 0;
+      } else {
+        scale.value = withSpring(2, SPRING_CONFIG);
+        savedScale.value = 2;
+      }
+    });
 
-  const handlePageChange = (page: number) => {
-    if (page >= 1 && page <= images.length) {
-      setCurrentIndex(page - 1);
-      setIsLoading(true);
-      setLoadError(false);
-    }
-  };
+  const composed = Gesture.Simultaneous(Gesture.Race(pinchGesture, doubleTapGesture), panGesture);
 
-  const handleBack = () => {
-    if (navigation && navigation.canGoBack && navigation.canGoBack()) {
-      navigation.goBack();
-    } else if (typeof window !== 'undefined' && window.history) {
-      window.history.back();
-    } else {
-      alert('뒤로가기 기능을 구현하세요.');
-    }
-  };
-
-  const handleToggleOverlay = () => setOverlayVisible((v) => !v);
-
-  // FastImage 설정
-  const fastImageProps = {
-    style: styles.image,
-    resizeMode: FastImage.resizeMode[resizeMode],
-    priority: FastImage.priority[options.imagePriority],
-    cache: options.enableCache ? FastImage.cacheControl.immutable : FastImage.cacheControl.web,
-    onLoadStart: () => setIsLoading(true),
-    onLoad: () => {
-      setIsLoading(false);
-      setLoadError(false);
-    },
-    onError: () => {
-      setIsLoading(false);
-      setLoadError(true);
-    },
-  };
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }],
+  }));
 
   return (
-    <View style={styles.imageContainer}>
-      <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={handleToggleOverlay}>
-        <FastImage
-          source={{
-            uri: loadError && options.showFallbackImage ? fallbackImage : images[currentIndex],
-          }}
-          {...fastImageProps}
-        />
-        {isLoading && options.showLoadingIndicator && (
-          <View style={[styles.loadingContainer, { backgroundColor: options.loadingBackgroundColor }]}>
-            <ActivityIndicator size="large" color={options.loadingIndicatorColor} />
-          </View>
-        )}
-
-        <ViewerOverlay
-          fileName={fileName}
-          currentPage={currentIndex + 1}
-          totalPages={images.length}
-          onBack={handleBack}
-          onPrevPage={goToPrevPage}
-          onNextPage={goToNextPage}
-          visible={overlayVisible}
-          onToggle={handleToggleOverlay}
-          onPageChange={handlePageChange}
-          viewerType={'image'}
-          options={options}
-          onOptionsChange={handleOptionsChange}
-        />
-      </TouchableOpacity>
-    </View>
+    <>
+      <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
+        <View style={styles.container}>
+          <GestureDetector gesture={composed}>
+            <Animated.View style={animatedStyle}>
+              <Image
+                source={{ uri }}
+                style={styles.image}
+                resizeMode="contain"
+                onLoadStart={() => setIsLoading(true)}
+                onLoadEnd={() => setIsLoading(false)}
+              />
+              {isLoading && <ActivityIndicator size="large" color="#fff" style={styles.loading} />}
+            </Animated.View>
+          </GestureDetector>
+          <ViewerOverlay visible={overlayVisible} onBack={() => navigation.goBack()} onSettings={() => {}} />
+        </View>
+      </TouchableWithoutFeedback>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  imageContainer: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+  container: {
+    flex: 1,
+    backgroundColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
   },
   image: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    width: SCREEN_WIDTH,
+    height: SCREEN_HEIGHT,
   },
-  loadingContainer: {
+  loading: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 });

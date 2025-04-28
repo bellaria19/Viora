@@ -1,212 +1,321 @@
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, FlatList, RefreshControl } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
-import { getFileList, importFile, deleteFile } from '@/utils/fileSystem';
-import { SortMenuItem, SortOption, sortOptions } from '@/types/sort';
-import SearchBar from '@/components/common/SearchBar';
-import FileListContainer from '@/components/file/FileListContainer';
-import { ModalContainer } from '@/components/common/Modal';
-import FileListItem from '@/components/file/FileListItem';
-import { FileItem } from '@/types/file';
-import { useUserPreferences } from '@/contexts/UserPreferences';
-import { useTheme, Theme } from '@react-navigation/native';
-
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-    },
-    loadingContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: theme.colors.background,
-    },
-    modalContainer: {
-      padding: 20,
-      backgroundColor: theme.colors.card,
-      borderRadius: 12,
-      width: '80%',
-    },
-    modalContent: {
-      width: '100%',
-    },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      marginBottom: 16,
-      textAlign: 'center',
-      color: theme.colors.text,
-    },
-    sortOption: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 12,
-      marginVertical: 4,
-      borderRadius: 8,
-      backgroundColor: theme.colors.card,
-    },
-    sortOptionSelected: {
-      backgroundColor: theme.colors.primary,
-    },
-    sortOptionText: {
-      marginLeft: 12,
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    sortOptionTextSelected: {
-      color: theme.colors.background,
-    },
-  });
+import { FontAwesome6 } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { FileInfo, getDirectoryContents } from '@/utils/fileManager';
+import { formatFileSize, formatDate, getFileIcon } from '@/utils/formatters';
+import { SortOption } from '@/types/sort';
+import SortButton from '@/components/files/SortButton';
+import SortMenu from '@/components/files/SortMenu';
+import { sortFiles } from '@/utils/sorting';
+import DuplicateFileModal from '@/components/files/DuplicateFileModal';
+import { useFilePicker } from '@/hooks/useFilePicker';
 
 export default function FilesScreen() {
-  const { preferences, setDefaultSortOption } = useUserPreferences();
-  const theme = useTheme();
-  const styles = createStyles(theme);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAddingFiles, setIsAddingFiles] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [files, setFiles] = useState<FileItem[]>([]);
-  const [filteredFiles, setFilteredFiles] = useState<FileItem[]>([]);
-  const [sortModalVisible, setSortModalVisible] = useState(false);
-  const [sortOrder, setSortOrder] = useState<SortOption>(preferences.defaultSortOption);
+  const [files, setFiles] = useState<FileInfo[]>([]);
+  const [filteredFiles, setFilteredFiles] = useState<FileInfo[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [sortOption, setSortOption] = useState<SortOption>(SortOption.DATE_DESC);
+  const [showSortMenu, setShowSortMenu] = useState(false);
 
-  const loadFiles = useCallback(async () => {
-    if (!isRefreshing) {
-      setIsLoading(true);
-    }
-    try {
-      const fileList = await getFileList();
-      setFiles(fileList);
-      setFilteredFiles(fileList);
-    } catch (error) {
-      console.error('파일 목록 로딩 오류:', error);
-    } finally {
-      if (!isRefreshing) {
-        setIsLoading(false);
-      }
-    }
-  }, [isRefreshing]);
+  const {
+    showDuplicateModal,
+    currentDuplicateFile,
+    currentDuplicateIndex,
+    duplicateFiles,
+    handleFilePick,
+    handleDuplicateSkip,
+    handleDuplicateOverwrite,
+  } = useFilePicker({
+    existingFiles: files,
+    onFilesProcessed: (newFiles) => setFiles((prev) => [...prev, ...newFiles]),
+  });
+
+  const loadFiles = async () => {
+    const fileList = await getDirectoryContents();
+    setFiles(fileList);
+  };
+
+  const filterAndSortFiles = useCallback(() => {
+    let filtered = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    filtered = sortFiles(filtered, sortOption);
+    setFilteredFiles(filtered);
+  }, [files, searchQuery, sortOption]);
 
   useEffect(() => {
     loadFiles();
-  }, [loadFiles, preferences.defaultSortOption]);
+  }, []);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredFiles(files);
-    } else {
-      const filtered = files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      setFilteredFiles(filtered);
-    }
-  }, [searchQuery, files]);
+    filterAndSortFiles();
+  }, [filterAndSortFiles]);
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    await loadFiles();
-    setIsRefreshing(false);
-  };
-
-  const onAddFile = async () => {
-    setIsAddingFiles(true);
-    try {
-      const file = await importFile();
-      if (file) {
-        setFiles((prevFiles) => [...prevFiles, file]);
-        Alert.alert('성공', '파일이 성공적으로 추가되었습니다.');
-      }
-    } catch (error) {
-      console.error('파일 추가 오류:', error);
-      Alert.alert('오류', '파일을 추가하는 중 오류가 발생했습니다.');
-    } finally {
-      setIsAddingFiles(false);
-    }
-  };
-
-  const handleDeleteFile = async (file: FileItem) => {
-    Alert.alert('파일 삭제', `"${file.name}" 파일을 삭제하시겠습니까?`, [
-      { text: '취소', style: 'cancel' },
-      {
-        text: '삭제',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            const deleted = await deleteFile(file.uri);
-            if (deleted) {
-              setFiles((prevFiles) => prevFiles.filter((f) => f.id !== file.id));
-              Alert.alert('성공', '파일이 삭제되었습니다.');
-            }
-          } catch (error) {
-            console.error('파일 삭제 오류:', error);
-            Alert.alert('오류', '파일을 삭제하는 중 오류가 발생했습니다.');
-          }
-        },
+  const handleFilePress = useCallback((file: FileInfo) => {
+    router.push({
+      pathname: '/viewer/[id]',
+      params: {
+        id: file.id,
+        type: file.type,
+        uri: file.uri,
+        title: file.name,
       },
-    ]);
-  };
+    });
+  }, []);
 
-  const handleSortOptionSelect = (option: SortMenuItem) => {
-    setSortOrder(option.id as SortOption);
-    setDefaultSortOption(option.id as SortOption);
-    setSortModalVisible(false);
-  };
-
-  const renderFileItem = (item: FileItem) => <FileListItem item={item} onLongPress={() => handleDeleteFile(item)} />;
-
-  const SortModal = () => (
-    <ModalContainer
-      visible={sortModalVisible}
-      onClose={() => setSortModalVisible(false)}
-      containerStyle={styles.modalContainer}
-    >
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>정렬 방식</Text>
-        {sortOptions.map((option) => (
-          <TouchableOpacity
-            key={option.id + option.label}
-            style={[styles.sortOption, sortOrder.startsWith(option.id) && styles.sortOptionSelected]}
-            onPress={() => handleSortOptionSelect(option)}
-          >
-            <FontAwesome
-              name={option.icon as keyof typeof FontAwesome.glyphMap}
-              size={20}
-              color={sortOrder.startsWith(option.id) ? '#FFFFFF' : '#007AFF'}
-            />
-            <Text style={[styles.sortOptionText, sortOrder.startsWith(option.id) && styles.sortOptionTextSelected]}>
-              {option.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </ModalContainer>
-  );
-
-  if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadFiles();
+    setRefreshing(false);
+  }, []);
 
   return (
     <View style={styles.container}>
-      <SearchBar value={searchQuery} onChangeText={setSearchQuery} />
-      <FileListContainer
-        data={filteredFiles}
-        renderItem={renderFileItem}
-        isLoading={isLoading}
-        isAddingFiles={isAddingFiles}
-        onAddFile={onAddFile}
-        sortOption={sortOrder}
-        emptyMessage={searchQuery ? '검색 결과가 없습니다' : '파일이 없습니다'}
-        onOpenSortModal={() => setSortModalVisible(true)}
-        onRefresh={handleRefresh}
-        isRefreshing={isRefreshing}
+      {(files.length > 0 || searchQuery) && (
+        <View style={styles.header}>
+          <View style={[styles.searchContainer, { marginRight: 0 }]}>
+            <FontAwesome6 name="magnifying-glass" size={20} color="#666" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="파일 검색..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
+        </View>
+      )}
+
+      {files.length > 0 && (
+        <View style={styles.sortContainer}>
+          <SortButton currentSortOption={sortOption} onPress={() => setShowSortMenu(true)} />
+        </View>
+      )}
+
+      <SortMenu
+        visible={showSortMenu}
+        onClose={() => setShowSortMenu(false)}
+        currentSortOption={sortOption}
+        onSelect={(option) => {
+          setSortOption(option);
+          setShowSortMenu(false);
+        }}
       />
-      <SortModal />
+
+      <FlatList
+        data={filteredFiles}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.fileItem} onPress={() => handleFilePress(item)}>
+            <FontAwesome6 name={getFileIcon(item.type)} size={24} color="#666" style={styles.fileIcon} />
+            <View style={styles.fileInfo}>
+              <Text style={styles.fileName}>{item.name}</Text>
+              <Text style={styles.fileDetail}>
+                {formatFileSize(item.size)} • {formatDate(item.modifiedTime)}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            {searchQuery ? (
+              <>
+                <FontAwesome6 name="magnifying-glass-minus" size={40} color="#ccc" />
+                <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
+              </>
+            ) : (
+              <>
+                <FontAwesome6 name="folder-open" size={40} color="#ccc" />
+                <Text style={styles.emptyText}>파일을 추가해주세요.</Text>
+                <TouchableOpacity style={styles.emptyAddButton} onPress={handleFilePick}>
+                  <FontAwesome6 name="plus" size={20} color="#fff" />
+                  <Text style={styles.emptyAddButtonText}>파일 추가하기</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        )}
+      />
+
+      {files.length > 0 && (
+        <TouchableOpacity style={styles.floatingButton} onPress={handleFilePick}>
+          <FontAwesome6 name="plus" size={24} color="white" />
+        </TouchableOpacity>
+      )}
+
+      <DuplicateFileModal
+        visible={showDuplicateModal}
+        currentFile={currentDuplicateFile}
+        currentIndex={currentDuplicateIndex}
+        totalCount={duplicateFiles.length}
+        onSkip={handleDuplicateSkip}
+        onOverwrite={handleDuplicateOverwrite}
+      />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    padding: 16,
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  searchContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+  },
+  searchIcon: {
+    marginHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+  },
+  floatingButton: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#007AFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  fileItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  fileIcon: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  fileInfo: {
+    flex: 1,
+  },
+  fileName: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  fileDetail: {
+    fontSize: 12,
+    color: '#666',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  emptyText: {
+    marginTop: 16,
+    marginBottom: 24,
+    fontSize: 16,
+    color: '#666',
+  },
+  emptyAddButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  emptyAddButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  sortContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 16,
+    width: '80%',
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  modalText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginVertical: 16,
+    lineHeight: 24,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+    marginTop: 8,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  modalButtonSkip: {
+    backgroundColor: '#f5f5f5',
+  },
+  modalButtonOverwrite: {
+    backgroundColor: '#007AFF',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666',
+  },
+  modalButtonTextOverwrite: {
+    color: '#fff',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
+  },
+});

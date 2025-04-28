@@ -1,339 +1,79 @@
-import { View, StyleSheet, Text, Switch, ScrollView } from 'react-native';
-import { useState, useEffect } from 'react';
-import * as FileSystem from 'expo-file-system';
-import { useUserPreferences } from '@/contexts/UserPreferences';
-import { useTheme, Theme } from '@react-navigation/native';
-import SettingsSection from '@/components/settings/SettingsSection';
-import SettingsItem from '@/components/settings/SettingsItem';
+import { View, Text, Switch, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useState } from 'react';
+import { resetAllFiles } from '@/utils/fileManager';
 
-// settings.tsx에서 임시로 사용할 설정 값
-const defaultPreferences = {
-  textViewer: {
-    fontSize: 16,
-    theme: 'light',
-    fontFamily: '시스템 기본',
-  },
-  pdfViewer: {
-    defaultZoom: 1.0,
-    pageSpacing: 8,
-    showPageNumbers: true,
-    viewMode: 'scroll',
-    enableRTL: false,
-  },
-  imageViewer: {
-    defaultZoom: 1.0,
-    enableDoubleTapZoom: true,
-  },
-  epubViewer: {
-    fontSize: 18,
-    theme: 'light',
-    fontFamily: '시스템 기본',
-  },
-};
+export default function SettingsScreen() {
+  const [darkMode, setDarkMode] = useState(false);
+  const [autoOpen, setAutoOpen] = useState(true);
 
-// 스타일 함수를 컴포넌트 외부로 분리
-const createStyles = (theme: Theme) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: theme.colors.background,
-      padding: 16,
-    },
-    settingItem: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 8,
-      backgroundColor: theme.colors.card,
-      paddingHorizontal: 16,
-      borderRadius: 12,
-      marginBottom: 16,
-    },
-    settingLabel: {
-      fontSize: 16,
-      color: theme.colors.text,
-    },
-    versionContainer: {
-      alignItems: 'center',
-      marginVertical: 20,
-    },
-    versionText: {
-      fontSize: 14,
-      color: theme.colors.text,
-      opacity: 0.6,
-    },
-  });
-
-export default function TabSettingsScreen() {
-  const theme = useTheme();
-  const { preferences, setDarkMode, updatePDFViewerSettings } = useUserPreferences();
-  const styles = createStyles(theme);
-
-  const [preferencesState, setPreferencesState] = useState(defaultPreferences);
-  const [appVersion, setAppVersion] = useState<string>('알 수 없음');
-
-  // 설정 파일 경로
-  const PREFERENCES_FILE = FileSystem.documentDirectory + 'preferences.json';
-
-  // 설정 불러오기 함수
-  const loadPreferences = async () => {
-    try {
-      const fileInfo = await FileSystem.getInfoAsync(PREFERENCES_FILE);
-      if (fileInfo.exists) {
-        const data = await FileSystem.readAsStringAsync(PREFERENCES_FILE);
-        const savedPreferences = JSON.parse(data);
-        setPreferencesState(savedPreferences);
-      } else {
-        // 파일이 없으면 기본값 저장
-        await savePreferences(defaultPreferences);
-      }
-    } catch (error) {
-      console.error('설정 불러오기 오류:', error);
-    }
-  };
-
-  // 설정 저장 함수
-  const savePreferences = async (newPreferences: typeof defaultPreferences) => {
-    try {
-      await FileSystem.writeAsStringAsync(PREFERENCES_FILE, JSON.stringify(newPreferences));
-      setPreferencesState(newPreferences);
-    } catch (error) {
-      console.error('설정 저장 오류:', error);
-    }
-  };
-
-  // 컴포넌트 마운트 시 설정 불러오기
-  useEffect(() => {
-    loadPreferences();
-  }, []);
-
-  // 텍스트 뷰어 설정 업데이트
-  const updateTextViewerPrefs = (updates: Partial<typeof preferencesState.textViewer>) => {
-    const newPreferences = {
-      ...preferencesState,
-      textViewer: {
-        ...preferencesState.textViewer,
-        ...updates,
+  const handleResetFiles = () => {
+    Alert.alert('파일 초기화', '모든 파일이 삭제됩니다. 계속하시겠습니까?', [
+      {
+        text: '취소',
+        style: 'cancel',
       },
-    };
-    savePreferences(newPreferences);
-  };
-
-  // PDF 뷰어 설정 업데이트
-  const updatePdfViewerPrefs = (updates: Partial<typeof preferencesState.pdfViewer>) => {
-    const newPreferences = {
-      ...preferencesState,
-      pdfViewer: {
-        ...preferencesState.pdfViewer,
-        ...updates,
+      {
+        text: '초기화',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await resetAllFiles();
+            Alert.alert('완료', '모든 파일이 초기화되었습니다.');
+          } catch (error) {
+            Alert.alert('오류', '파일 초기화 중 오류가 발생했습니다.');
+          }
+        },
       },
-    };
-    savePreferences(newPreferences);
-  };
-
-  // 이미지 뷰어 설정 업데이트
-  const updateImageViewerPrefs = (updates: Partial<typeof preferencesState.imageViewer>) => {
-    const newPreferences = {
-      ...preferencesState,
-      imageViewer: {
-        ...preferencesState.imageViewer,
-        ...updates,
-      },
-    };
-    savePreferences(newPreferences);
-  };
-
-  // EPUB 뷰어 설정 업데이트
-  const updateEpubViewerPrefs = (updates: Partial<typeof preferencesState.epubViewer>) => {
-    const newPreferences = {
-      ...preferencesState,
-      epubViewer: {
-        ...preferencesState.epubViewer,
-        ...updates,
-      },
-    };
-    savePreferences(newPreferences);
-  };
-
-  // 설정 초기화
-  const resetPreferences = () => {
-    savePreferences(defaultPreferences);
-  };
-
-  // 텍스트 뷰어 테마 설정
-  const handleTextThemeChange = (theme: 'light' | 'dark' | 'sepia') => {
-    updateTextViewerPrefs({ theme });
-  };
-
-  // PDF 페이지 번호 표시 설정
-  const handlePdfShowPageNumbers = (showPageNumbers: boolean) => {
-    updatePdfViewerPrefs({ showPageNumbers });
-  };
-
-  // 이미지 더블탭 줌 설정
-  const handleImageDoubleTapZoom = (enableDoubleTapZoom: boolean) => {
-    updateImageViewerPrefs({ enableDoubleTapZoom });
+    ]);
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <SettingsSection title="앱 설정">
-        <SettingsItem
-          icon="moon-o"
-          iconColor="#007AFF"
-          title="다크 모드"
-          subtitle="어두운 테마로 전환"
-          right={
-            <Switch
-              value={preferences.darkMode}
-              onValueChange={(value) => setDarkMode(value)}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={preferences.darkMode ? '#007AFF' : '#f4f3f4'}
-            />
-          }
-        />
-      </SettingsSection>
-
-      <SettingsSection title="PDF 뷰어 설정">
-        <SettingsItem
-          icon="file-pdf-o"
-          iconColor="#FF3B30"
-          title="보기 모드"
-          subtitle={preferences.pdfViewer.viewMode === 'scroll' ? '스크롤 모드' : '페이지 모드'}
-          right={
-            <Switch
-              value={preferences.pdfViewer.viewMode === 'page'}
-              onValueChange={(value) => updatePDFViewerSettings({ viewMode: value ? 'page' : 'scroll' })}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={preferences.pdfViewer.viewMode === 'page' ? '#007AFF' : '#f4f3f4'}
-            />
-          }
-        />
-        <SettingsItem
-          icon="align-right"
-          iconColor="#5856D6"
-          title="RTL 모드"
-          subtitle="오른쪽에서 왼쪽으로 읽기"
-          right={
-            <Switch
-              value={preferences.pdfViewer.enableRTL}
-              onValueChange={(value) => updatePDFViewerSettings({ enableRTL: value })}
-              trackColor={{ false: '#767577', true: '#81b0ff' }}
-              thumbColor={preferences.pdfViewer.enableRTL ? '#007AFF' : '#f4f3f4'}
-            />
-          }
-        />
-      </SettingsSection>
-
-      <SettingsSection title="텍스트 뷰어 설정">
-        <SettingsItem
-          icon="font"
-          iconColor="#34C759"
-          title="글꼴 크기"
-          subtitle={`${preferencesState.textViewer.fontSize}px`}
-          onPress={() => {
-            /* 글꼴 크기 설정 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="paint-brush"
-          iconColor="#5856D6"
-          title="테마"
-          subtitle={
-            preferencesState.textViewer.theme === 'light'
-              ? '밝은 테마'
-              : preferencesState.textViewer.theme === 'dark'
-                ? '어두운 테마'
-                : '세피아'
-          }
-          onPress={() => {
-            /* 테마 선택 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="text-width"
-          iconColor="#FF9500"
-          title="글꼴"
-          subtitle={preferencesState.textViewer.fontFamily}
-          onPress={() => {
-            /* 글꼴 선택 모달 표시 */
-          }}
-        />
-      </SettingsSection>
-
-      <SettingsSection title="이미지 뷰어 설정">
-        <SettingsItem
-          icon="search-plus"
-          iconColor="#5856D6"
-          title="기본 확대 배율"
-          subtitle={`${preferencesState.imageViewer.defaultZoom}x`}
-          onPress={() => {
-            /* 확대 배율 설정 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="hand-o-up"
-          iconColor="#34C759"
-          title="더블탭 확대 활성화"
-          right={
-            <Switch
-              value={preferencesState.imageViewer.enableDoubleTapZoom}
-              onValueChange={handleImageDoubleTapZoom}
-              trackColor={{ false: '#D1D1D6', true: '#007AFF' }}
-            />
-          }
-        />
-      </SettingsSection>
-
-      <SettingsSection title="EPUB 뷰어 설정">
-        <SettingsItem
-          icon="font"
-          iconColor="#FF3B30"
-          title="글꼴 크기"
-          subtitle={`${preferencesState.epubViewer.fontSize}px`}
-          onPress={() => {
-            /* 글꼴 크기 설정 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="paint-brush"
-          iconColor="#FF9500"
-          title="테마"
-          subtitle={
-            preferencesState.epubViewer.theme === 'light'
-              ? '밝은 테마'
-              : preferencesState.epubViewer.theme === 'dark'
-                ? '어두운 테마'
-                : '세피아'
-          }
-          onPress={() => {
-            /* 테마 선택 모달 표시 */
-          }}
-        />
-        <SettingsItem
-          icon="text-width"
-          iconColor="#AF52DE"
-          title="글꼴"
-          subtitle={preferencesState.epubViewer.fontFamily}
-          onPress={() => {
-            /* 글꼴 선택 모달 표시 */
-          }}
-        />
-      </SettingsSection>
-
-      <SettingsSection title="일반 설정">
-        <SettingsItem
-          icon="refresh"
-          iconColor="#8E8E93"
-          title="설정 초기화"
-          subtitle="모든 뷰어 설정을 기본값으로 되돌립니다"
-          onPress={resetPreferences}
-        />
-      </SettingsSection>
-
-      <View style={styles.versionContainer}>
-        <Text style={styles.versionText}>파일 뷰어 앱 v{appVersion}</Text>
+    <View style={styles.container}>
+      <View style={styles.settingItem}>
+        <Text style={styles.settingText}>다크 모드</Text>
+        <Switch value={darkMode} onValueChange={setDarkMode} />
       </View>
-    </ScrollView>
+      <View style={styles.settingItem}>
+        <Text style={styles.settingText}>파일 자동 열기</Text>
+        <Switch value={autoOpen} onValueChange={setAutoOpen} />
+      </View>
+      <View style={styles.settingItem}>
+        <Text style={styles.settingText}>버전</Text>
+        <Text>1.0.0</Text>
+      </View>
+      <TouchableOpacity style={styles.resetButton} onPress={handleResetFiles}>
+        <Text style={styles.resetButtonText}>모든 파일 초기화</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  settingText: {
+    fontSize: 16,
+  },
+  resetButton: {
+    backgroundColor: '#ff3b30',
+    padding: 16,
+    borderRadius: 8,
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});

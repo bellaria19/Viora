@@ -1,23 +1,23 @@
-import { FileItem } from '@/types/file';
+import { FileInfo } from '@/utils/fileManager';
 import { SortOption } from '@/types/sort';
 
-export function sortFiles(files: FileItem[], sortOption: SortOption): FileItem[] {
-  const sortedFiles = [...files];
-
-  switch (sortOption) {
-    case SortOption.NAME_ASC:
-      return sortedFiles.sort((a, b) => a.name.localeCompare(b.name));
-    case SortOption.NAME_DESC:
-      return sortedFiles.sort((a, b) => b.name.localeCompare(a.name));
-    case SortOption.SIZE_ASC:
-      return sortedFiles.sort((a, b) => a.size - b.size);
-    case SortOption.SIZE_DESC:
-      return sortedFiles.sort((a, b) => b.size - a.size);
-    case SortOption.TYPE_ASC:
-      return sortedFiles.sort((a, b) => a.type.localeCompare(b.type));
-    case SortOption.TYPE_DESC:
-      return sortedFiles.sort((a, b) => b.type.localeCompare(a.type));
-    default:
-      return sortedFiles;
-  }
-}
+export const sortFiles = (files: FileInfo[], sortOption: SortOption): FileInfo[] => {
+  return [...files].sort((a, b) => {
+    switch (sortOption) {
+      case 'name_asc':
+        return a.name.localeCompare(b.name);
+      case 'name_desc':
+        return b.name.localeCompare(a.name);
+      case 'size_asc':
+        return a.size - b.size;
+      case 'size_desc':
+        return b.size - a.size;
+      case 'date_asc':
+        return a.modifiedTime - b.modifiedTime;
+      case 'date_desc':
+        return b.modifiedTime - a.modifiedTime;
+      default:
+        return 0;
+    }
+  });
+};

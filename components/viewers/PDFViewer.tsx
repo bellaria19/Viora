@@ -1,180 +1,68 @@
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import * as FileSystem from 'expo-file-system';
+import { View, StyleSheet, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import Pdf from 'react-native-pdf';
-import ViewerOverlay from '@/components/viewers/ViewerOverlay';
-import { FontAwesome } from '@expo/vector-icons';
-import { useUserPreferences, defaultPreferences } from '@/contexts/UserPreferences';
+import React, { useState, useRef } from 'react';
+import ViewerOverlay from './ViewerOverlay';
+import { useNavigation } from '@react-navigation/native';
+import PDFSettingsSheet from '@/components/viewers/PDFSettingsSheet';
 
 interface PDFViewerProps {
-  fileUri: string;
-  fileName?: string;
+  uri: string;
+  onSettings?: () => void;
 }
 
-export default function PDFViewer({ fileUri, fileName = 'PDF 파일' }: PDFViewerProps) {
-  const { preferences, updatePDFViewerSettings, isLoading: preferencesLoading } = useUserPreferences();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export default function PDFViewer({ uri }: PDFViewerProps) {
+  const [overlayVisible, setOverlayVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
-  const [overlayVisible, setOverlayVisible] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [settingsVisible, setSettingsVisible] = useState(false);
   const pdfRef = useRef<any>(null);
   const navigation = useNavigation();
 
-  // 현재 설정 (preferences가 로드되지 않았을 때는 기본값 사용)
-  const currentSettings = preferencesLoading ? defaultPreferences.pdfViewer : preferences.pdfViewer;
-
-  useEffect(() => {
-    const checkFileExists = async () => {
-      try {
-        const fileInfo = await FileSystem.getInfoAsync(fileUri);
-        if (!fileInfo.exists) {
-          setError('PDF 파일을 찾을 수 없습니다.');
-          setIsLoading(false);
-          return;
-        }
-        if (fileInfo.size === 0) {
-          setError('PDF 파일이 비어있습니다.');
-          setIsLoading(false);
-          return;
-        }
-        setIsLoading(false);
-      } catch (err) {
-        console.error(err);
-        setError('PDF 파일을 확인하는 중 오류가 발생했습니다.');
-        setIsLoading(false);
-      }
-    };
-    checkFileExists();
-  }, [fileUri]);
-
-  if (error) {
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-      </View>
-    );
-  }
-
-  if (preferencesLoading) {
-    return (
-      <View style={styles.loadingOverlay}>
-        <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>설정을 불러오는 중...</Text>
-      </View>
-    );
-  }
-
-  const source = { uri: fileUri, cache: true };
-
-  const goToPrevPage = () => {
-    if (currentPage > 1 && pdfRef.current) {
-      pdfRef.current.setPage(currentPage - 1);
-    }
-  };
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages && pdfRef.current) {
-      pdfRef.current.setPage(currentPage + 1);
-    }
-  };
-
   const handlePageChange = (page: number) => {
-    if (pdfRef.current && page >= 1 && page <= totalPages) {
-      pdfRef.current.setPage(page);
-    }
+    setCurrentPage(page);
+    pdfRef.current?.setPage(page);
   };
-
-  const handleBack = () => {
-    if (navigation && navigation.canGoBack && navigation.canGoBack()) {
-      navigation.goBack();
-    } else if (typeof window !== 'undefined' && window.history) {
-      window.history.back();
-    } else {
-      alert('뒤로가기 기능을 구현하세요.');
-    }
-  };
-
-  const handleToggleOverlay = () => setOverlayVisible((v) => !v);
 
   return (
-    <View style={styles.pdfContainer}>
-      <TouchableOpacity activeOpacity={1} style={{ flex: 1 }} onPress={handleToggleOverlay}>
-        <Pdf
-          ref={pdfRef}
-          source={source}
-          style={styles.pdf}
-          onLoadComplete={(numberOfPages) => {
-            setTotalPages(numberOfPages);
-            setIsLoading(false);
-          }}
-          onPageChanged={(page) => {
-            setCurrentPage(page);
-          }}
-          onError={() => {
-            setError('PDF를 불러오는 중 오류가 발생했습니다.');
-          }}
-          enablePaging={currentSettings.viewMode === 'page'}
-          horizontal={currentSettings.viewMode === 'page'}
-          spacing={currentSettings.pageSpacing}
-          enableRTL={currentSettings.enableRTL}
-          enableAnnotationRendering={true}
-        />
-        {isLoading && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={styles.loadingText}>PDF를 불러오는 중...</Text>
-          </View>
-        )}
-        <ViewerOverlay
-          fileName={fileName}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onBack={handleBack}
-          onPrevPage={goToPrevPage}
-          onNextPage={goToNextPage}
-          visible={overlayVisible}
-          onToggle={handleToggleOverlay}
-          onPageChange={handlePageChange}
-          viewerType={'pdf'}
-          options={currentSettings}
-          onOptionsChange={updatePDFViewerSettings}
-        />
-      </TouchableOpacity>
-    </View>
+    <>
+      <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
+        <View style={styles.container}>
+          <Pdf
+            ref={pdfRef}
+            source={{ uri }}
+            style={styles.pdf}
+            enablePaging={true}
+            horizontal={false}
+            spacing={0}
+            onPageChanged={(page, numberOfPages) => {
+              setCurrentPage(page);
+              setTotalPages(numberOfPages);
+            }}
+            onLoadComplete={(numberOfPages) => setTotalPages(numberOfPages)}
+          />
+          <ViewerOverlay
+            visible={overlayVisible}
+            onBack={() => navigation.goBack()}
+            onSettings={() => setSettingsVisible(true)}
+            showSlider={totalPages > 1}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </View>
+      </TouchableWithoutFeedback>
+      <PDFSettingsSheet visible={settingsVisible} onClose={() => setSettingsVisible(false)} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  pdfContainer: {
+  container: {
     flex: 1,
+    backgroundColor: '#fff',
   },
   pdf: {
     flex: 1,
     width: Dimensions.get('window').width,
-    backgroundColor: '#f8f8f8',
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#666666',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#FF3B30',
-    textAlign: 'center',
   },
 });

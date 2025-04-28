@@ -1,4 +1,4 @@
-import FastImage from 'react-native-fast-image';
+// import FastImage from 'react-native-fast-image';
 
 export interface ImageViewerOptions {
   enableDoubleTapZoom: boolean;
@@ -14,7 +14,7 @@ export interface ImageViewerOptions {
   // 스타일 설정
   loadingIndicatorColor: string;
   loadingBackgroundColor: string;
-  imagePriority: keyof typeof FastImage.priority;
+  // imagePriority: keyof typeof FastImage.priority;
 }
 
 export interface ImageViewerSettingsProps {
@@ -25,15 +25,21 @@ export interface ImageViewerSettingsProps {
 }
 
 export interface PDFViewerOptions {
-  // 기능 설정
-  enablePaging: boolean;
-  enableDoubleTapZoom: boolean;
+  // 뷰어 모드 설정
+  viewMode: 'scroll' | 'page';
+  enableRTL: boolean;
+
+  // 페이지 표시 설정
+  pageSpacing: number;
+  showPageNumbers: boolean;
 
   // 성능 설정
   enableCache: boolean;
 
+  // 확대/축소 설정
+  enableDoubleTapZoom: boolean;
+
   // 화면 표시 설정
-  showPageNumber: boolean;
   showLoadingIndicator: boolean;
   showThumbnails: boolean;
 }

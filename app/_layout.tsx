@@ -1,33 +1,17 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { initializeFileSystem } from '@/utils/fileManager';
 import * as SplashScreen from 'expo-splash-screen';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
-import 'react-native-reanimated';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { UserPreferencesProvider, useUserPreferences } from '@/contexts/UserPreferences';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function NavigationRoot() {
-  const { preferences } = useUserPreferences();
-  const theme = preferences.darkMode ? DarkTheme : DefaultTheme;
-
-  return (
-    <ThemeProvider value={theme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(viewer)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style={preferences.darkMode ? 'light' : 'dark'} />
-    </ThemeProvider>
-  );
-}
-
 export default function RootLayout() {
+  useEffect(() => {
+    initializeFileSystem();
+  }, []);
+
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
@@ -41,12 +25,24 @@ export default function RootLayout() {
   if (!loaded) {
     return null;
   }
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <UserPreferencesProvider>
-        <NavigationRoot />
-      </UserPreferencesProvider>
+      <Stack>
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="viewer/[id]"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
     </GestureHandlerRootView>
   );
 }

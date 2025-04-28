@@ -1,46 +1,28 @@
 import { Tabs } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 
-export default function TabsLayout() {
+export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof FontAwesome.glyphMap = 'file-o';
-
-          if (route.name === 'index') {
-            iconName = focused ? 'home' : 'home';
-          } else if (route.name === 'files') {
-            iconName = focused ? 'folder' : 'folder-o';
-          } else if (route.name === 'settings') {
-            iconName = focused ? 'cog' : 'cog';
-          }
-
-          return <FontAwesome name={iconName} size={size} color={color} />;
-        },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
-      })}
-    >
+    <Tabs>
       <Tabs.Screen
         name="index"
         options={{
           title: '최근 파일',
-          headerTitleAlign: 'center',
+          tabBarIcon: ({ color, size }) => <FontAwesome6 name="clock-rotate-left" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="files"
         options={{
           title: '모든 파일',
-          headerTitleAlign: 'center',
+          tabBarIcon: ({ color, size }) => <FontAwesome6 name="folder" size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: '설정',
-          headerTitleAlign: 'center',
+          tabBarIcon: ({ color, size }) => <FontAwesome6 name="gear" size={size} color={color} />,
         }}
       />
     </Tabs>
