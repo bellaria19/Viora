@@ -1,8 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { TextViewerOptions } from '@/types/option';
-import { SettingsSection } from '@/components/SettingsBottomSheet';
 
 interface TextViewerSettingsProps {
   options: TextViewerOptions;
@@ -36,196 +35,145 @@ export default function TextViewerSettings({ options, onOptionsChange }: TextVie
     { id: 'Georgia', label: '조지아' },
   ];
 
-  // 설정 섹션 구성
-  const sections = useMemo<SettingsSection[]>(
-    () => [
-      {
-        title: '테마',
-        data: [
-          {
-            key: 'theme',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View style={styles.themeOptions}>
-                  {themes.map((theme) => (
-                    <TouchableOpacity
-                      key={theme.id}
-                      style={[
-                        styles.themeOption,
-                        { backgroundColor: theme.bgColor },
-                        localOptions.theme === theme.id && styles.selectedThemeOption,
-                      ]}
-                      onPress={() => {
-                        handleOptionChange('theme', theme.id);
-                        handleOptionChange('backgroundColor', theme.bgColor);
-                        handleOptionChange('textColor', theme.textColor);
-                      }}
-                    >
-                      <Text style={[styles.themeLabel, { color: theme.textColor }]}>{theme.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '글꼴',
-        data: [
-          {
-            key: 'fontFamily',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View style={styles.fontOptions}>
-                  {fonts.map((font) => (
-                    <TouchableOpacity
-                      key={font.id}
-                      style={[styles.fontOption, localOptions.fontFamily === font.id && styles.selectedFontOption]}
-                      onPress={() => handleOptionChange('fontFamily', font.id)}
-                    >
-                      <Text
-                        style={[
-                          styles.fontLabel,
-                          { fontFamily: font.id },
-                          localOptions.fontFamily === font.id && styles.selectedFontLabel,
-                        ]}
-                      >
-                        {font.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '글자 크기',
-        data: [
-          {
-            key: 'fontSize',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View style={styles.sliderContainer}>
-                  <Text style={styles.sliderValueLabel}>작게</Text>
-                  <Slider
-                    style={styles.slider}
-                    minimumValue={12}
-                    maximumValue={28}
-                    step={1}
-                    value={localOptions.fontSize}
-                    onValueChange={(value) => handleOptionChange('fontSize', value)}
-                    minimumTrackTintColor="#007AFF"
-                    maximumTrackTintColor="#ddd"
-                    thumbTintColor="#007AFF"
-                  />
-                  <Text style={styles.sliderValueLabel}>크게</Text>
-                  <Text style={styles.sliderValue}>{Math.round(localOptions.fontSize)}px</Text>
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '줄 간격',
-        data: [
-          {
-            key: 'lineHeight',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View style={styles.sliderContainer}>
-                  <Text style={styles.sliderValueLabel}>좁게</Text>
-                  <Slider
-                    style={styles.slider}
-                    minimumValue={1.0}
-                    maximumValue={2.5}
-                    step={0.1}
-                    value={localOptions.lineHeight}
-                    onValueChange={(value) => handleOptionChange('lineHeight', value)}
-                    minimumTrackTintColor="#007AFF"
-                    maximumTrackTintColor="#ddd"
-                    thumbTintColor="#007AFF"
-                  />
-                  <Text style={styles.sliderValueLabel}>넓게</Text>
-                  <Text style={styles.sliderValue}>{localOptions.lineHeight.toFixed(1)}</Text>
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '여백',
-        data: [
-          {
-            key: 'margin',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View style={styles.sliderContainer}>
-                  <Text style={styles.sliderValueLabel}>좁게</Text>
-                  <Slider
-                    style={styles.slider}
-                    minimumValue={8}
-                    maximumValue={40}
-                    step={2}
-                    value={localOptions.marginHorizontal}
-                    onValueChange={(value) => {
-                      handleOptionChange('marginHorizontal', value);
-                      handleOptionChange('marginVertical', value);
-                    }}
-                    minimumTrackTintColor="#007AFF"
-                    maximumTrackTintColor="#ddd"
-                    thumbTintColor="#007AFF"
-                  />
-                  <Text style={styles.sliderValueLabel}>넓게</Text>
-                  <Text style={styles.sliderValue}>{Math.round(localOptions.marginHorizontal)}px</Text>
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '미리보기',
-        data: [
-          {
-            key: 'preview',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View
-                  style={[
-                    styles.textPreview,
-                    {
-                      backgroundColor: getThemeBackground(localOptions.theme),
-                      paddingHorizontal: localOptions.marginHorizontal,
-                      paddingVertical: localOptions.marginVertical,
-                    },
-                  ]}
-                >
-                  <Text
-                    style={{
-                      fontFamily: localOptions.fontFamily,
-                      fontSize: localOptions.fontSize,
-                      lineHeight: localOptions.fontSize * localOptions.lineHeight,
-                      color: getThemeTextColor(localOptions.theme),
-                    }}
-                  >
-                    이것은 미리보기 텍스트입니다. 설정을 변경하면 이 텍스트의 모양이 바뀝니다.
-                  </Text>
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-    ],
-    [localOptions, handleOptionChange],
-  );
+  return (
+    <View style={styles.container}>
+      {/* 텍스트 테마 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>테마</Text>
+        <View style={styles.themeOptions}>
+          {themes.map((theme) => (
+            <TouchableOpacity
+              key={theme.id}
+              style={[
+                styles.themeOption,
+                { backgroundColor: theme.bgColor },
+                localOptions.theme === theme.id && styles.selectedThemeOption,
+              ]}
+              onPress={() => handleOptionChange('theme', theme.id)}
+            >
+              <Text style={[styles.themeLabel, { color: theme.textColor }]}>{theme.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
-  return { sections };
+      {/* 폰트 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>글꼴</Text>
+        <View style={styles.fontOptions}>
+          {fonts.map((font) => (
+            <TouchableOpacity
+              key={font.id}
+              style={[styles.fontOption, localOptions.fontFamily === font.id && styles.selectedFontOption]}
+              onPress={() => handleOptionChange('fontFamily', font.id)}
+            >
+              <Text
+                style={[
+                  styles.fontLabel,
+                  { fontFamily: font.id },
+                  localOptions.fontFamily === font.id && styles.selectedFontLabel,
+                ]}
+              >
+                {font.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      {/* 글자 크기 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>글자 크기</Text>
+        <View style={styles.sliderContainer}>
+          <Text style={styles.sliderValueLabel}>작게</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={12}
+            maximumValue={28}
+            step={1}
+            value={localOptions.fontSize}
+            onValueChange={(value) => handleOptionChange('fontSize', value)}
+            minimumTrackTintColor="#007AFF"
+            maximumTrackTintColor="#ddd"
+            thumbTintColor="#007AFF"
+          />
+          <Text style={styles.sliderValueLabel}>크게</Text>
+          <Text style={styles.sliderValue}>{Math.round(localOptions.fontSize)}px</Text>
+        </View>
+      </View>
+
+      {/* 줄 간격 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>줄 간격</Text>
+        <View style={styles.sliderContainer}>
+          <Text style={styles.sliderValueLabel}>좁게</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={1.0}
+            maximumValue={2.5}
+            step={0.1}
+            value={localOptions.lineHeight}
+            onValueChange={(value) => handleOptionChange('lineHeight', value)}
+            minimumTrackTintColor="#007AFF"
+            maximumTrackTintColor="#ddd"
+            thumbTintColor="#007AFF"
+          />
+          <Text style={styles.sliderValueLabel}>넓게</Text>
+          <Text style={styles.sliderValue}>{localOptions.lineHeight.toFixed(1)}</Text>
+        </View>
+      </View>
+
+      {/* 여백 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>여백</Text>
+        <View style={styles.sliderContainer}>
+          <Text style={styles.sliderValueLabel}>좁게</Text>
+          <Slider
+            style={styles.slider}
+            minimumValue={8}
+            maximumValue={40}
+            step={2}
+            value={localOptions.marginHorizontal}
+            onValueChange={(value) => {
+              handleOptionChange('marginHorizontal', value);
+              handleOptionChange('marginVertical', value);
+            }}
+            minimumTrackTintColor="#007AFF"
+            maximumTrackTintColor="#ddd"
+            thumbTintColor="#007AFF"
+          />
+          <Text style={styles.sliderValueLabel}>넓게</Text>
+          <Text style={styles.sliderValue}>{Math.round(localOptions.marginHorizontal)}px</Text>
+        </View>
+      </View>
+
+      {/* 미리보기 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>미리보기</Text>
+        <View
+          style={[
+            styles.textPreview,
+            {
+              backgroundColor: getThemeBackground(localOptions.theme),
+              paddingHorizontal: localOptions.marginHorizontal,
+              paddingVertical: localOptions.marginVertical,
+            },
+          ]}
+        >
+          <Text
+            style={{
+              fontFamily: localOptions.fontFamily,
+              fontSize: localOptions.fontSize,
+              lineHeight: localOptions.fontSize * localOptions.lineHeight,
+              color: getThemeTextColor(localOptions.theme),
+            }}
+          >
+            이것은 미리보기 텍스트입니다. 설정을 변경하면 이 텍스트의 모양이 바뀝니다.
+          </Text>
+        </View>
+      </View>
+    </View>
+  );
 }
 
 // 테마에 따른 배경색 가져오기
@@ -257,14 +205,22 @@ function getThemeTextColor(theme: 'light' | 'dark' | 'sepia'): string {
 }
 
 const styles = StyleSheet.create({
-  settingItem: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  container: {
+    paddingVertical: 8,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333',
   },
   themeOptions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 8,
   },
   themeOption: {
     flex: 1,
@@ -286,6 +242,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginBottom: 8,
   },
   fontOption: {
     paddingVertical: 8,
@@ -310,6 +267,7 @@ const styles = StyleSheet.create({
   sliderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 16,
   },
   slider: {
     flex: 1,

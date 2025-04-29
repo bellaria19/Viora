@@ -1,27 +1,16 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SectionList, SectionListRenderItemInfo } from 'react-native';
-import BottomSheet, { BottomSheetBackdrop } from '@gorhom/bottom-sheet';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { FontAwesome6 } from '@expo/vector-icons';
-
-// 설정 섹션 및 아이템 타입 정의
-export interface SettingsSection {
-  title: string;
-  data: SettingsItem[];
-}
-
-export interface SettingsItem {
-  key: string;
-  renderItem: () => React.ReactElement;
-}
 
 interface SettingsBottomSheetProps {
   title: string;
   isVisible: boolean;
   onClose: () => void;
-  sections: SettingsSection[];
+  children: React.ReactNode;
 }
 
-export default function SettingsBottomSheet({ title, isVisible, onClose, sections }: SettingsBottomSheetProps) {
+export default function SettingsBottomSheet({ title, isVisible, onClose, children }: SettingsBottomSheetProps) {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   // 바텀 시트 스냅 포인트 설정 (화면의 80%)
@@ -43,19 +32,6 @@ export default function SettingsBottomSheet({ title, isVisible, onClose, section
     [],
   );
 
-  // 섹션 헤더 렌더링 함수
-  const renderSectionHeader = useCallback(
-    ({ section }: { section: SettingsSection }) => (
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{section.title}</Text>
-      </View>
-    ),
-    [],
-  );
-
-  // 개별 아이템 렌더링 함수
-  const renderItem = useCallback(({ item }: SectionListRenderItemInfo<SettingsItem>) => item.renderItem(), []);
-
   // 바텀 시트 열기/닫기
   React.useEffect(() => {
     if (isVisible) {
@@ -64,8 +40,6 @@ export default function SettingsBottomSheet({ title, isVisible, onClose, section
       bottomSheetRef.current?.close();
     }
   }, [isVisible]);
-
-  const keyExtractor = useCallback((item: SettingsItem) => item.key, []);
 
   return (
     <BottomSheet
@@ -84,14 +58,7 @@ export default function SettingsBottomSheet({ title, isVisible, onClose, section
           <FontAwesome6 name="xmark" size={20} color="#666" />
         </TouchableOpacity>
       </View>
-      <SectionList
-        sections={sections}
-        keyExtractor={keyExtractor}
-        renderItem={renderItem}
-        renderSectionHeader={renderSectionHeader}
-        stickySectionHeadersEnabled={false}
-        contentContainerStyle={styles.listContent}
-      />
+      <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>{children}</BottomSheetScrollView>
     </BottomSheet>
   );
 }
@@ -120,19 +87,8 @@ const styles = StyleSheet.create({
   closeButton: {
     padding: 8,
   },
-  listContent: {
-    paddingBottom: 24,
-  },
-  sectionHeader: {
-    backgroundColor: '#f8f8f8',
+  contentContainer: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    paddingBottom: 24,
   },
 });

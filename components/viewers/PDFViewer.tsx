@@ -44,12 +44,6 @@ export default function PDFViewer({ uri }: PDFViewerProps) {
     // 예: 모드 변경이나 간격 설정 등의 즉시 적용이 필요한 기능
   }, []);
 
-  // PDFViewerSettings 컴포넌트로부터 설정 섹션 가져오기
-  const { sections } = PDFViewerSettings({
-    options: viewerOptions,
-    onOptionsChange: handleSettingsChange,
-  });
-
   // 설정에 따른 PDF 속성 계산
   const pdfHorizontal = viewerOptions.viewMode === 'page';
   const pdfSpacing = viewerOptions.pageSpacing;
@@ -86,13 +80,10 @@ export default function PDFViewer({ uri }: PDFViewerProps) {
         </View>
       </TouchableWithoutFeedback>
 
-      {/* 설정 바텀 시트 - SectionList 형식 */}
-      <SettingsBottomSheet
-        title="PDF 설정"
-        isVisible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-        sections={sections}
-      />
+      {/* 설정 바텀 시트 */}
+      <SettingsBottomSheet title="PDF 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
+        <PDFViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+      </SettingsBottomSheet>
     </>
   );
 }

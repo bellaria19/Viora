@@ -22,7 +22,7 @@ interface ZipImageViewerOptions extends ImageViewerOptions {
   loopEnabled: boolean;
 }
 
-export default function ZipImageViewer({ uri }: ZipImageViewerProps) {
+export default function ZipImageViewer({ uri, onSettings }: ZipImageViewerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [images, setImages] = useState<string[]>([]);
@@ -165,12 +165,6 @@ export default function ZipImageViewer({ uri }: ZipImageViewerProps) {
     }
   };
 
-  // ZipImageViewerSettings 컴포넌트로부터 설정 섹션 가져오기
-  const { sections } = ZipImageViewerSettings({
-    options: viewerOptions,
-    onOptionsChange: handleSettingsChange,
-  });
-
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -210,13 +204,14 @@ export default function ZipImageViewer({ uri }: ZipImageViewerProps) {
         </View>
       </TouchableWithoutFeedback>
 
-      {/* 설정 바텀 시트 - SectionList 형식 */}
+      {/* 설정 바텀 시트 */}
       <SettingsBottomSheet
         title="ZIP 이미지 설정"
         isVisible={settingsVisible}
         onClose={() => setSettingsVisible(false)}
-        sections={sections}
-      />
+      >
+        <ZipImageViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+      </SettingsBottomSheet>
     </>
   );
 }

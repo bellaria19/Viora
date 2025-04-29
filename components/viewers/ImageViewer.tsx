@@ -110,12 +110,6 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
     setViewerOptions((prev) => ({ ...prev, ...newOptions }));
   };
 
-  // ImageViewerSettings 컴포넌트로부터 설정 섹션 가져오기
-  const { sections } = ImageViewerSettings({
-    options: viewerOptions,
-    onOptionsChange: handleSettingsChange,
-  });
-
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
@@ -146,13 +140,10 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
         </View>
       </TouchableWithoutFeedback>
 
-      {/* 설정 바텀 시트 - SectionList 형식 */}
-      <SettingsBottomSheet
-        title="이미지 설정"
-        isVisible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-        sections={sections}
-      />
+      {/* 설정 바텀 시트 */}
+      <SettingsBottomSheet title="이미지 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
+        <ImageViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+      </SettingsBottomSheet>
     </>
   );
 }

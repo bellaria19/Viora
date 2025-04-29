@@ -80,12 +80,6 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
     applySettingsToReader();
   };
 
-  // EPUBViewerSettings 컴포넌트로부터 설정 섹션 가져오기
-  const { sections } = EPUBViewerSettings({
-    options: viewerOptions,
-    onOptionsChange: handleSettingsChange,
-  });
-
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
@@ -107,13 +101,10 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
         </View>
       </TouchableWithoutFeedback>
 
-      {/* 설정 바텀 시트 - SectionList 형식 */}
-      <SettingsBottomSheet
-        title="EPUB 설정"
-        isVisible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-        sections={sections}
-      />
+      {/* 설정 바텀 시트 */}
+      <SettingsBottomSheet title="EPUB 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
+        <EPUBViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+      </SettingsBottomSheet>
     </>
   );
 }

@@ -1,8 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { ImageViewerOptions } from '@/types/option';
-import { SettingsSection } from '@/components/SettingsBottomSheet';
 
 // ZIP 이미지 뷰어는 기본적으로 ImageViewer 설정을 사용하지만
 // ZIP 압축 파일에 특화된 일부 설정이 추가될 수 있음
@@ -40,217 +39,160 @@ export default function ZipImageViewerSettings({ options, onOptionsChange }: Zip
   // 자동 재생 간격 옵션 (초)
   const intervals = [1, 2, 3, 5, 10];
 
-  // 설정 섹션 구성
-  const sections = useMemo<SettingsSection[]>(
-    () => [
-      {
-        title: '이미지 정렬',
-        data: [
-          {
-            key: 'sortImagesBy',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <View style={styles.sortOptions}>
-                  {sortOptions.map((option) => (
-                    <TouchableOpacity
-                      key={option.id}
-                      style={[styles.sortOption, localOptions.sortImagesBy === option.id && styles.selectedSortOption]}
-                      onPress={() => handleOptionChange('sortImagesBy', option.id)}
-                    >
-                      <FontAwesome6
-                        name={option.icon as any}
-                        size={16}
-                        color={localOptions.sortImagesBy === option.id ? '#007AFF' : '#666'}
-                      />
-                      <Text
-                        style={[
-                          styles.sortOptionText,
-                          localOptions.sortImagesBy === option.id && styles.selectedSortOptionText,
-                        ]}
-                      >
-                        {option.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '자동 재생',
-        data: [
-          {
-            key: 'autoPlayEnabled',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>자동 재생 사용</Text>
-                <Switch
-                  value={localOptions.autoPlayEnabled}
-                  onValueChange={(value) => handleOptionChange('autoPlayEnabled', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-          ...(localOptions.autoPlayEnabled
-            ? [
-                {
-                  key: 'loopEnabled',
-                  renderItem: () => (
-                    <View style={styles.settingItem}>
-                      <Text style={styles.settingLabel}>반복 재생</Text>
-                      <Switch
-                        value={localOptions.loopEnabled}
-                        onValueChange={(value) => handleOptionChange('loopEnabled', value)}
-                        trackColor={{ false: '#ddd', true: '#007AFF' }}
-                      />
-                    </View>
-                  ),
-                },
-                {
-                  key: 'autoPlayInterval',
-                  renderItem: () => (
-                    <View style={styles.settingItemColumn}>
-                      <Text style={styles.settingLabel}>재생 간격</Text>
-                      <View style={styles.intervalOptions}>
-                        {intervals.map((interval) => (
-                          <TouchableOpacity
-                            key={interval}
-                            style={[
-                              styles.intervalOption,
-                              localOptions.autoPlayInterval === interval && styles.selectedIntervalOption,
-                            ]}
-                            onPress={() => handleOptionChange('autoPlayInterval', interval)}
-                          >
-                            <Text
-                              style={[
-                                styles.intervalOptionText,
-                                localOptions.autoPlayInterval === interval && styles.selectedIntervalOptionText,
-                              ]}
-                            >
-                              {interval}초
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
-                      </View>
-                    </View>
-                  ),
-                },
-              ]
-            : []),
-        ].filter(Boolean),
-      },
-      {
-        title: '제스처 설정',
-        data: [
-          {
-            key: 'enableDoubleTapZoom',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>더블 탭 확대/축소</Text>
-                <Switch
-                  value={localOptions.enableDoubleTapZoom}
-                  onValueChange={(value) => handleOptionChange('enableDoubleTapZoom', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '성능 설정',
-        data: [
-          {
-            key: 'enablePreload',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>이미지 미리 로드</Text>
-                <Switch
-                  value={localOptions.enablePreload}
-                  onValueChange={(value) => handleOptionChange('enablePreload', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-          {
-            key: 'enableCache',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>이미지 캐싱</Text>
-                <Switch
-                  value={localOptions.enableCache}
-                  onValueChange={(value) => handleOptionChange('enableCache', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '표시 설정',
-        data: [
-          {
-            key: 'showLoadingIndicator',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>로딩 인디케이터 표시</Text>
-                <Switch
-                  value={localOptions.showLoadingIndicator}
-                  onValueChange={(value) => handleOptionChange('showLoadingIndicator', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-          {
-            key: 'showFallbackImage',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>오류 시 기본 이미지 표시</Text>
-                <Switch
-                  value={localOptions.showFallbackImage}
-                  onValueChange={(value) => handleOptionChange('showFallbackImage', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-    ],
-    [localOptions, handleOptionChange, intervals],
-  );
+  return (
+    <View style={styles.container}>
+      {/* 이미지 정렬 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>이미지 정렬</Text>
+        <View style={styles.sortOptions}>
+          {sortOptions.map((option) => (
+            <TouchableOpacity
+              key={option.id}
+              style={[styles.sortOption, localOptions.sortImagesBy === option.id && styles.selectedSortOption]}
+              onPress={() => handleOptionChange('sortImagesBy', option.id)}
+            >
+              <FontAwesome6
+                name={option.icon as any}
+                size={16}
+                color={localOptions.sortImagesBy === option.id ? '#007AFF' : '#666'}
+              />
+              <Text
+                style={[
+                  styles.sortOptionText,
+                  localOptions.sortImagesBy === option.id && styles.selectedSortOptionText,
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
 
-  return { sections };
+      {/* 자동 재생 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>자동 재생</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>자동 재생 사용</Text>
+          <Switch
+            value={localOptions.autoPlayEnabled}
+            onValueChange={(value) => handleOptionChange('autoPlayEnabled', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+        {localOptions.autoPlayEnabled && (
+          <>
+            <View style={styles.settingItem}>
+              <Text style={styles.settingLabel}>반복 재생</Text>
+              <Switch
+                value={localOptions.loopEnabled}
+                onValueChange={(value) => handleOptionChange('loopEnabled', value)}
+                trackColor={{ false: '#ddd', true: '#007AFF' }}
+              />
+            </View>
+            <View style={styles.settingItemColumn}>
+              <Text style={styles.settingLabel}>재생 간격</Text>
+              <View style={styles.intervalOptions}>
+                {intervals.map((interval) => (
+                  <TouchableOpacity
+                    key={interval}
+                    style={[
+                      styles.intervalOption,
+                      localOptions.autoPlayInterval === interval && styles.selectedIntervalOption,
+                    ]}
+                    onPress={() => handleOptionChange('autoPlayInterval', interval)}
+                  >
+                    <Text
+                      style={[
+                        styles.intervalOptionText,
+                        localOptions.autoPlayInterval === interval && styles.selectedIntervalOptionText,
+                      ]}
+                    >
+                      {interval}초
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          </>
+        )}
+      </View>
+
+      {/* 제스처 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>제스처 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>더블 탭 확대/축소</Text>
+          <Switch
+            value={localOptions.enableDoubleTapZoom}
+            onValueChange={(value) => handleOptionChange('enableDoubleTapZoom', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+
+      {/* 성능 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>성능 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>이미지 미리 로드</Text>
+          <Switch
+            value={localOptions.enablePreload}
+            onValueChange={(value) => handleOptionChange('enablePreload', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>이미지 캐싱</Text>
+          <Switch
+            value={localOptions.enableCache}
+            onValueChange={(value) => handleOptionChange('enableCache', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+
+      {/* 표시 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>표시 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>로딩 인디케이터 표시</Text>
+          <Switch
+            value={localOptions.showLoadingIndicator}
+            onValueChange={(value) => handleOptionChange('showLoadingIndicator', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>오류 시 기본 이미지 표시</Text>
+          <Switch
+            value={localOptions.showFallbackImage}
+            onValueChange={(value) => handleOptionChange('showFallbackImage', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-  settingItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  container: {
+    paddingVertical: 8,
   },
-  settingItemColumn: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  section: {
+    marginBottom: 16,
   },
-  settingLabel: {
-    fontSize: 15,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
     color: '#333',
   },
   sortOptions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
+    marginBottom: 8,
   },
   sortOption: {
     flexDirection: 'row',
@@ -275,6 +217,23 @@ const styles = StyleSheet.create({
   selectedSortOptionText: {
     color: '#007AFF',
     fontWeight: '600',
+  },
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  settingItemColumn: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  settingLabel: {
+    fontSize: 15,
+    color: '#333',
   },
   intervalOptions: {
     flexDirection: 'row',

@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { PDFViewerOptions } from '@/types/option';
-import { SettingsSection, SettingsItem } from '@/components/SettingsBottomSheet';
 
 interface PDFViewerSettingsProps {
   options: PDFViewerOptions;
@@ -22,182 +21,140 @@ export default function PDFViewerSettings({ options, onOptionsChange }: PDFViewe
     onOptionsChange({ [key]: value });
   };
 
-  // 설정 섹션 구성
-  const sections = useMemo<SettingsSection[]>(
-    () => [
-      {
-        title: '뷰어 모드',
-        data: [
-          {
-            key: 'viewMode',
-            renderItem: () => (
-              <View style={styles.optionRow}>
-                <View style={styles.optionGroup}>
-                  <TouchableOpacity
-                    style={[styles.modeButton, localOptions.viewMode === 'page' && styles.modeButtonActive]}
-                    onPress={() => handleOptionChange('viewMode', 'page')}
-                  >
-                    <FontAwesome6 name="file" size={16} color={localOptions.viewMode === 'page' ? '#fff' : '#666'} />
-                    <Text
-                      style={[styles.modeButtonText, localOptions.viewMode === 'page' && styles.modeButtonTextActive]}
-                    >
-                      페이지
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[styles.modeButton, localOptions.viewMode === 'scroll' && styles.modeButtonActive]}
-                    onPress={() => handleOptionChange('viewMode', 'scroll')}
-                  >
-                    <FontAwesome6
-                      name="scroll"
-                      size={16}
-                      color={localOptions.viewMode === 'scroll' ? '#fff' : '#666'}
-                    />
-                    <Text
-                      style={[styles.modeButtonText, localOptions.viewMode === 'scroll' && styles.modeButtonTextActive]}
-                    >
-                      스크롤
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '페이지 설정',
-        data: [
-          {
-            key: 'pageSpacing',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>페이지 간격</Text>
-                <View style={styles.sliderContainer}>
-                  <Slider
-                    style={styles.slider}
-                    minimumValue={0}
-                    maximumValue={20}
-                    step={1}
-                    value={localOptions.pageSpacing}
-                    onValueChange={(value) => handleOptionChange('pageSpacing', value)}
-                    minimumTrackTintColor="#007AFF"
-                    maximumTrackTintColor="#ddd"
-                    thumbTintColor="#007AFF"
-                  />
-                  <Text style={styles.sliderValue}>{localOptions.pageSpacing}px</Text>
-                </View>
-              </View>
-            ),
-          },
-          {
-            key: 'showPageNumbers',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>페이지 번호 표시</Text>
-                <Switch
-                  value={localOptions.showPageNumbers}
-                  onValueChange={(value) => handleOptionChange('showPageNumbers', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '성능 설정',
-        data: [
-          {
-            key: 'enableCache',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>캐시 사용</Text>
-                <Switch
-                  value={localOptions.enableCache}
-                  onValueChange={(value) => handleOptionChange('enableCache', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-          {
-            key: 'enableDoubleTapZoom',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>더블 탭 확대/축소</Text>
-                <Switch
-                  value={localOptions.enableDoubleTapZoom}
-                  onValueChange={(value) => handleOptionChange('enableDoubleTapZoom', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '화면 표시 설정',
-        data: [
-          {
-            key: 'showLoadingIndicator',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>로딩 표시</Text>
-                <Switch
-                  value={localOptions.showLoadingIndicator}
-                  onValueChange={(value) => handleOptionChange('showLoadingIndicator', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-          {
-            key: 'showThumbnails',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>썸네일 표시</Text>
-                <Switch
-                  value={localOptions.showThumbnails}
-                  onValueChange={(value) => handleOptionChange('showThumbnails', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-      {
-        title: '기타 설정',
-        data: [
-          {
-            key: 'enableRTL',
-            renderItem: () => (
-              <View style={styles.settingItem}>
-                <Text style={styles.settingLabel}>RTL 방향 (오른쪽에서 왼쪽)</Text>
-                <Switch
-                  value={localOptions.enableRTL}
-                  onValueChange={(value) => handleOptionChange('enableRTL', value)}
-                  trackColor={{ false: '#ddd', true: '#007AFF' }}
-                />
-              </View>
-            ),
-          },
-        ],
-      },
-    ],
-    [localOptions, handleOptionChange],
-  );
+  return (
+    <View style={styles.container}>
+      {/* 뷰어 모드 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>뷰어 모드</Text>
+        <View style={styles.optionRow}>
+          <View style={styles.optionGroup}>
+            <TouchableOpacity
+              style={[styles.modeButton, localOptions.viewMode === 'page' && styles.modeButtonActive]}
+              onPress={() => handleOptionChange('viewMode', 'page')}
+            >
+              <FontAwesome6 name="file" size={16} color={localOptions.viewMode === 'page' ? '#fff' : '#666'} />
+              <Text style={[styles.modeButtonText, localOptions.viewMode === 'page' && styles.modeButtonTextActive]}>
+                페이지
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modeButton, localOptions.viewMode === 'scroll' && styles.modeButtonActive]}
+              onPress={() => handleOptionChange('viewMode', 'scroll')}
+            >
+              <FontAwesome6 name="scroll" size={16} color={localOptions.viewMode === 'scroll' ? '#fff' : '#666'} />
+              <Text style={[styles.modeButtonText, localOptions.viewMode === 'scroll' && styles.modeButtonTextActive]}>
+                스크롤
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
 
-  return { sections };
+      {/* 페이지 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>페이지 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>페이지 간격</Text>
+          <View style={styles.sliderContainer}>
+            <Slider
+              style={styles.slider}
+              minimumValue={0}
+              maximumValue={20}
+              step={1}
+              value={localOptions.pageSpacing}
+              onValueChange={(value) => handleOptionChange('pageSpacing', value)}
+              minimumTrackTintColor="#007AFF"
+              maximumTrackTintColor="#ddd"
+              thumbTintColor="#007AFF"
+            />
+            <Text style={styles.sliderValue}>{localOptions.pageSpacing}px</Text>
+          </View>
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>페이지 번호 표시</Text>
+          <Switch
+            value={localOptions.showPageNumbers}
+            onValueChange={(value) => handleOptionChange('showPageNumbers', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+
+      {/* 성능 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>성능 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>캐시 사용</Text>
+          <Switch
+            value={localOptions.enableCache}
+            onValueChange={(value) => handleOptionChange('enableCache', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>더블 탭 확대/축소</Text>
+          <Switch
+            value={localOptions.enableDoubleTapZoom}
+            onValueChange={(value) => handleOptionChange('enableDoubleTapZoom', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+
+      {/* 화면 표시 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>화면 표시 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>로딩 표시</Text>
+          <Switch
+            value={localOptions.showLoadingIndicator}
+            onValueChange={(value) => handleOptionChange('showLoadingIndicator', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>썸네일 표시</Text>
+          <Switch
+            value={localOptions.showThumbnails}
+            onValueChange={(value) => handleOptionChange('showThumbnails', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+
+      {/* RTL 설정 */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>기타 설정</Text>
+        <View style={styles.settingItem}>
+          <Text style={styles.settingLabel}>RTL 방향 (오른쪽에서 왼쪽)</Text>
+          <Switch
+            value={localOptions.enableRTL}
+            onValueChange={(value) => handleOptionChange('enableRTL', value)}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+          />
+        </View>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 8,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    color: '#333',
+  },
   optionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    marginBottom: 8,
   },
   optionGroup: {
     flexDirection: 'row',
@@ -225,7 +182,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',

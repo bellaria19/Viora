@@ -49,12 +49,6 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
     setViewerOptions((prev) => ({ ...prev, ...newOptions }));
   };
 
-  // TextViewerSettings 컴포넌트로부터 설정 섹션 가져오기
-  const { sections } = TextViewerSettings({
-    options: viewerOptions,
-    onOptionsChange: handleSettingsChange,
-  });
-
   // 테마에 따른 배경색과 텍스트 색상 가져오기
   const getThemeStyles = () => {
     switch (viewerOptions.theme) {
@@ -106,13 +100,10 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
         </View>
       </TouchableWithoutFeedback>
 
-      {/* 설정 바텀 시트 - SectionList 형식 */}
-      <SettingsBottomSheet
-        title="텍스트 설정"
-        isVisible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-        sections={sections}
-      />
+      {/* 설정 바텀 시트 */}
+      <SettingsBottomSheet title="텍스트 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
+        <TextViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+      </SettingsBottomSheet>
     </>
   );
 }
