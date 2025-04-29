@@ -6,10 +6,14 @@ import { formatDate, getFileIcon } from '@/utils/formatters';
 import { FontAwesome6 } from '@expo/vector-icons';
 import DuplicateFileModal from '@/components/files/DuplicateFileModal';
 import { useFilePicker } from '@/hooks/useFilePicker';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 export default function RecentScreen() {
   const [recentFiles, setRecentFiles] = useState<FileInfo[]>([]);
   const [refreshing, setRefreshing] = useState(false);
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   const {
     showDuplicateModal,
@@ -52,24 +56,35 @@ export default function RecentScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={recentFiles}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.fileItem} onPress={() => handleFilePress(item)}>
-            <FontAwesome6 name={getFileIcon(item.type)} size={24} color="#666" style={styles.fileIcon} />
+          <TouchableOpacity
+            style={[styles.fileItem, { borderBottomColor: colors.border }]}
+            onPress={() => handleFilePress(item)}
+          >
+            <FontAwesome6
+              name={getFileIcon(item.type)}
+              size={24}
+              color={colors.secondaryText}
+              style={styles.fileIcon}
+            />
             <View style={styles.fileInfo}>
-              <Text style={styles.fileName}>{item.name}</Text>
-              <Text style={styles.fileDetail}>{formatDate(item.modifiedTime)}</Text>
+              <Text style={[styles.fileName, { color: colors.text }]}>{item.name}</Text>
+              <Text style={[styles.fileDetail, { color: colors.secondaryText }]}>{formatDate(item.modifiedTime)}</Text>
             </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
-            <FontAwesome6 name="clock-rotate-left" size={40} color="#ccc" />
-            <Text style={styles.emptyText}>최근에 본 파일이 없습니다.</Text>
-            <TouchableOpacity style={styles.emptyAddButton} onPress={handleFilePick}>
+            <FontAwesome6 name="clock-rotate-left" size={40} color={colors.secondaryText} />
+            <Text style={[styles.emptyText, { color: colors.secondaryText }]}>최근에 본 파일이 없습니다.</Text>
+            <TouchableOpacity
+              style={[styles.emptyAddButton, { backgroundColor: colors.primary }]}
+              onPress={handleFilePick}
+            >
               <FontAwesome6 name="plus" size={20} color="#fff" />
               <Text style={styles.emptyAddButtonText}>파일 추가하기</Text>
             </TouchableOpacity>
@@ -92,14 +107,12 @@ export default function RecentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   fileItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   fileIcon: {
     width: 24,
@@ -117,7 +130,6 @@ const styles = StyleSheet.create({
   },
   fileDetail: {
     fontSize: 12,
-    color: '#666',
   },
   emptyContainer: {
     flex: 1,
@@ -129,12 +141,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 24,
     fontSize: 16,
-    color: '#666',
   },
   emptyAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,

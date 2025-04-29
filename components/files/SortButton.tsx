@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { SortOption, sortOptions } from '@/types/sort';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 interface SortButtonProps {
   currentSortOption: SortOption;
@@ -9,12 +11,14 @@ interface SortButtonProps {
 
 export default function SortButton({ currentSortOption, onPress }: SortButtonProps) {
   const option = sortOptions.find((opt) => opt.id === currentSortOption);
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   return (
-    <TouchableOpacity style={styles.sortButton} onPress={onPress}>
+    <TouchableOpacity style={[styles.sortButton, { backgroundColor: colors.buttonBackground }]} onPress={onPress}>
       <View style={styles.sortButtonContent}>
-        <FontAwesome6 name="sort" size={16} color="#666" />
-        <Text style={styles.sortButtonText}>{option?.label}</Text>
+        <FontAwesome6 name="sort" size={16} color={colors.secondaryText} />
+        <Text style={[styles.sortButtonText, { color: colors.text }]}>{option?.label}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -24,7 +28,6 @@ const styles = StyleSheet.create({
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -37,6 +40,5 @@ const styles = StyleSheet.create({
   },
   sortButtonText: {
     fontSize: 14,
-    color: '#333',
   },
 });

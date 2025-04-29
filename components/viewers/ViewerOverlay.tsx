@@ -1,6 +1,8 @@
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { FontAwesome6 } from '@expo/vector-icons';
 import Slider from '@react-native-community/slider';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 interface ViewerOverlayProps {
   visible: boolean;
@@ -21,7 +23,11 @@ export default function ViewerOverlay({
   totalPages = 1,
   onPageChange,
 }: ViewerOverlayProps) {
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
+
   if (!visible) return null;
+
   return (
     <View style={styles.overlay} pointerEvents="box-none">
       <View style={styles.topBar}>

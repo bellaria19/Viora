@@ -1,11 +1,75 @@
-import { View, Text, Switch, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Switch, StyleSheet, TouchableOpacity, Alert, SectionList } from 'react-native';
 import { useState } from 'react';
 import { resetAllFiles } from '@/utils/fileManager';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
+import { FontAwesome6 } from '@expo/vector-icons';
+import TextViewerSettingsItem from '@/components/settings/TextViewerSettingsItem';
+import PDFViewerSettingsItem from '@/components/settings/PDFViewerSettingsItem';
+import ImageViewerSettingsItem from '@/components/settings/ImageViewerSettingsItem';
+import EPUBViewerSettingsItem from '@/components/settings/EPUBViewerSettingsItem';
+import ZipViewerSettingsItem from '@/components/settings/ZipImageViewerSettingsItem';
+import ViewerSettingsScreen from '@/components/settings/ViewerSettingsScreen';
+
+// 섹션 데이터 타입 정의
+interface SettingsSection {
+  title: string;
+  data: SettingsItem[];
+}
+
+interface SettingsItem {
+  key: string;
+  render: () => JSX.Element;
+}
 
 export default function SettingsScreen() {
-  const [darkMode, setDarkMode] = useState(false);
   const [autoOpen, setAutoOpen] = useState(true);
+  const { theme, currentTheme, setTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
+  // 현재 보고있는 설정 화면 상태
+  const [currentViewerSettings, setCurrentViewerSettings] = useState<string | null>(null);
+
+  // 테마 선택 모달 표시 함수
+  const handleThemeSelection = () => {
+    Alert.alert('테마 설정', '원하는 테마를 선택하세요', [
+      {
+        text: '라이트 모드',
+        onPress: () => setTheme('light'),
+        style: theme === 'light' ? 'default' : 'default',
+      },
+      {
+        text: '다크 모드',
+        onPress: () => setTheme('dark'),
+        style: theme === 'dark' ? 'default' : 'default',
+      },
+      {
+        text: '시스템 설정 따르기',
+        onPress: () => setTheme('system'),
+        style: theme === 'system' ? 'default' : 'default',
+      },
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+    ]);
+  };
+
+  // 현재 선택된 테마 텍스트
+  const getThemeText = () => {
+    switch (theme) {
+      case 'light':
+        return '라이트 모드';
+      case 'dark':
+        return '다크 모드';
+      case 'system':
+        return '시스템 설정 따름';
+      default:
+        return '';
+    }
+  };
+
+  // 앱 초기화 함수
   const handleResetFiles = () => {
     Alert.alert('파일 초기화', '모든 파일이 삭제됩니다. 계속하시겠습니까?', [
       {
@@ -27,23 +91,119 @@ export default function SettingsScreen() {
     ]);
   };
 
+  // 섹션 데이터 생성
+  const sections: SettingsSection[] = [
+    {
+      title: '앱 설정',
+      data: [
+        {
+          key: 'theme',
+          render: () => (
+            <TouchableOpacity
+              style={[styles.settingItem, { borderBottomColor: colors.border }]}
+              onPress={handleThemeSelection}
+            >
+              <Text style={[styles.settingText, { color: colors.text }]}>테마</Text>
+              <View style={styles.themeSelector}>
+                <Text style={[styles.themeText, { color: colors.secondaryText }]}>{getThemeText()}</Text>
+                <FontAwesome6 name="chevron-right" size={14} color={colors.secondaryText} />
+              </View>
+            </TouchableOpacity>
+          ),
+        },
+        {
+          key: 'autoOpen',
+          render: () => (
+            <View style={[styles.settingItem, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.settingText, { color: colors.text }]}>파일 자동 열기</Text>
+              <Switch
+                value={autoOpen}
+                onValueChange={setAutoOpen}
+                trackColor={{ false: colors.buttonBackground, true: colors.primary }}
+              />
+            </View>
+          ),
+        },
+      ],
+    },
+    {
+      title: '뷰어 설정',
+      data: [
+        {
+          key: 'textViewer',
+          render: () => <TextViewerSettingsItem onPress={() => setCurrentViewerSettings('text')} />,
+        },
+        {
+          key: 'pdfViewer',
+          render: () => <PDFViewerSettingsItem onPress={() => setCurrentViewerSettings('pdf')} />,
+        },
+        {
+          key: 'imageViewer',
+          render: () => <ImageViewerSettingsItem onPress={() => setCurrentViewerSettings('image')} />,
+        },
+        {
+          key: 'epubViewer',
+          render: () => <EPUBViewerSettingsItem onPress={() => setCurrentViewerSettings('epub')} />,
+        },
+        {
+          key: 'zipViewer',
+          render: () => <ZipViewerSettingsItem onPress={() => setCurrentViewerSettings('zip')} />,
+        },
+      ],
+    },
+    {
+      title: '정보',
+      data: [
+        {
+          key: 'version',
+          render: () => (
+            <View style={[styles.settingItem, { borderBottomColor: colors.border }]}>
+              <Text style={[styles.settingText, { color: colors.text }]}>버전</Text>
+              <Text style={{ color: colors.secondaryText }}>1.0.0</Text>
+            </View>
+          ),
+        },
+      ],
+    },
+    {
+      title: '데이터 관리',
+      data: [
+        {
+          key: 'reset',
+          render: () => (
+            <TouchableOpacity
+              style={[styles.resetButton, { backgroundColor: colors.errorText }]}
+              onPress={handleResetFiles}
+            >
+              <Text style={styles.resetButtonText}>모든 파일 초기화</Text>
+            </TouchableOpacity>
+          ),
+        },
+      ],
+    },
+  ];
+
+  // 뷰어 설정 화면이 열려있을 때 렌더링
+  if (currentViewerSettings) {
+    return (
+      <ViewerSettingsScreen viewerType={currentViewerSettings as any} onBack={() => setCurrentViewerSettings(null)} />
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <View style={styles.settingItem}>
-        <Text style={styles.settingText}>다크 모드</Text>
-        <Switch value={darkMode} onValueChange={setDarkMode} />
-      </View>
-      <View style={styles.settingItem}>
-        <Text style={styles.settingText}>파일 자동 열기</Text>
-        <Switch value={autoOpen} onValueChange={setAutoOpen} />
-      </View>
-      <View style={styles.settingItem}>
-        <Text style={styles.settingText}>버전</Text>
-        <Text>1.0.0</Text>
-      </View>
-      <TouchableOpacity style={styles.resetButton} onPress={handleResetFiles}>
-        <Text style={styles.resetButtonText}>모든 파일 초기화</Text>
-      </TouchableOpacity>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <SectionList
+        sections={sections}
+        keyExtractor={(item) => item.key}
+        renderItem={({ item }) => item.render()}
+        renderSectionHeader={({ section: { title } }) => (
+          <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
+            <Text style={[styles.sectionHeaderText, { color: colors.secondaryText }]}>{title}</Text>
+          </View>
+        )}
+        stickySectionHeadersEnabled={true}
+        contentContainerStyle={styles.listContent}
+      />
     </View>
   );
 }
@@ -51,24 +211,43 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+  },
+  listContent: {
+    paddingBottom: 24,
+  },
+  sectionHeader: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'transparent',
+  },
+  sectionHeaderText: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   settingText: {
     fontSize: 16,
   },
+  themeSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  themeText: {
+    fontSize: 14,
+  },
   resetButton: {
-    backgroundColor: '#ff3b30',
+    margin: 16,
     padding: 16,
     borderRadius: 8,
-    marginTop: 24,
     alignItems: 'center',
   },
   resetButtonText: {

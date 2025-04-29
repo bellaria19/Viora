@@ -10,6 +10,8 @@ import SortMenu from '@/components/files/SortMenu';
 import { sortFiles } from '@/utils/sorting';
 import DuplicateFileModal from '@/components/files/DuplicateFileModal';
 import { useFilePicker } from '@/hooks/useFilePicker';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 export default function FilesScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,6 +20,8 @@ export default function FilesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [sortOption, setSortOption] = useState<SortOption>(SortOption.DATE_DESC);
   const [showSortMenu, setShowSortMenu] = useState(false);
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   const {
     showDuplicateModal,
@@ -70,14 +74,15 @@ export default function FilesScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {(files.length > 0 || searchQuery) && (
-        <View style={styles.header}>
-          <View style={[styles.searchContainer, { marginRight: 0 }]}>
-            <FontAwesome6 name="magnifying-glass" size={20} color="#666" style={styles.searchIcon} />
+        <View style={[styles.header, { borderBottomColor: colors.border }]}>
+          <View style={[styles.searchContainer, { backgroundColor: colors.searchBackground, marginRight: 0 }]}>
+            <FontAwesome6 name="magnifying-glass" size={20} color={colors.secondaryText} style={styles.searchIcon} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: colors.text }]}
               placeholder="파일 검색..."
+              placeholderTextColor={colors.placeholder}
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
@@ -86,7 +91,7 @@ export default function FilesScreen() {
       )}
 
       {files.length > 0 && (
-        <View style={styles.sortContainer}>
+        <View style={[styles.sortContainer, { borderBottomColor: colors.border }]}>
           <SortButton currentSortOption={sortOption} onPress={() => setShowSortMenu(true)} />
         </View>
       )}
@@ -103,13 +108,21 @@ export default function FilesScreen() {
 
       <FlatList
         data={filteredFiles}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.fileItem} onPress={() => handleFilePress(item)}>
-            <FontAwesome6 name={getFileIcon(item.type)} size={24} color="#666" style={styles.fileIcon} />
+          <TouchableOpacity
+            style={[styles.fileItem, { borderBottomColor: colors.border }]}
+            onPress={() => handleFilePress(item)}
+          >
+            <FontAwesome6
+              name={getFileIcon(item.type)}
+              size={24}
+              color={colors.secondaryText}
+              style={styles.fileIcon}
+            />
             <View style={styles.fileInfo}>
-              <Text style={styles.fileName}>{item.name}</Text>
-              <Text style={styles.fileDetail}>
+              <Text style={[styles.fileName, { color: colors.text }]}>{item.name}</Text>
+              <Text style={[styles.fileDetail, { color: colors.secondaryText }]}>
                 {formatFileSize(item.size)} • {formatDate(item.modifiedTime)}
               </Text>
             </View>
@@ -119,14 +132,17 @@ export default function FilesScreen() {
           <View style={styles.emptyContainer}>
             {searchQuery ? (
               <>
-                <FontAwesome6 name="magnifying-glass-minus" size={40} color="#ccc" />
-                <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
+                <FontAwesome6 name="magnifying-glass-minus" size={40} color={colors.secondaryText} />
+                <Text style={[styles.emptyText, { color: colors.secondaryText }]}>검색 결과가 없습니다.</Text>
               </>
             ) : (
               <>
-                <FontAwesome6 name="folder-open" size={40} color="#ccc" />
-                <Text style={styles.emptyText}>파일을 추가해주세요.</Text>
-                <TouchableOpacity style={styles.emptyAddButton} onPress={handleFilePick}>
+                <FontAwesome6 name="folder-open" size={40} color={colors.secondaryText} />
+                <Text style={[styles.emptyText, { color: colors.secondaryText }]}>파일을 추가해주세요.</Text>
+                <TouchableOpacity
+                  style={[styles.emptyAddButton, { backgroundColor: colors.primary }]}
+                  onPress={handleFilePick}
+                >
                   <FontAwesome6 name="plus" size={20} color="#fff" />
                   <Text style={styles.emptyAddButtonText}>파일 추가하기</Text>
                 </TouchableOpacity>
@@ -137,7 +153,7 @@ export default function FilesScreen() {
       />
 
       {files.length > 0 && (
-        <TouchableOpacity style={styles.floatingButton} onPress={handleFilePick}>
+        <TouchableOpacity style={[styles.floatingButton, { backgroundColor: colors.primary }]} onPress={handleFilePick}>
           <FontAwesome6 name="plus" size={24} color="white" />
         </TouchableOpacity>
       )}
@@ -157,20 +173,17 @@ export default function FilesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   header: {
     flexDirection: 'row',
     padding: 16,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   searchContainer: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
     borderRadius: 8,
   },
   searchIcon: {
@@ -188,7 +201,6 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#007AFF',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -205,7 +217,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   fileIcon: {
     width: 24,
@@ -223,7 +234,6 @@ const styles = StyleSheet.create({
   },
   fileDetail: {
     fontSize: 12,
-    color: '#666',
   },
   emptyContainer: {
     flex: 1,
@@ -235,12 +245,10 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 24,
     fontSize: 16,
-    color: '#666',
   },
   emptyAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -255,67 +263,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    padding: 24,
-    borderRadius: 16,
-    width: '80%',
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  modalText: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-    marginVertical: 16,
-    lineHeight: 24,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-    marginTop: 8,
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  modalButtonSkip: {
-    backgroundColor: '#f5f5f5',
-  },
-  modalButtonOverwrite: {
-    backgroundColor: '#007AFF',
-  },
-  modalButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
-  },
-  modalButtonTextOverwrite: {
-    color: '#fff',
-  },
-  modalSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
   },
 });

@@ -3,32 +3,26 @@ import { View, StyleSheet, ScrollView, Text, TouchableWithoutFeedback } from 're
 import * as FileSystem from 'expo-file-system';
 import ViewerOverlay from './ViewerOverlay';
 import { useNavigation } from '@react-navigation/native';
-import { TextViewerOptions } from '@/types/option';
 import SettingsBottomSheet from '@/components/SettingsBottomSheet';
 import TextViewerSettings from '@/components/settings/TextViewerSettings';
+import { useViewerSettings } from '@/hooks/useViewerSettings';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 interface TextViewerProps {
   uri: string;
-  onSettings?: () => void;
 }
 
-export default function TextViewer({ uri, onSettings }: TextViewerProps) {
+export default function TextViewer({ uri }: TextViewerProps) {
   const [content, setContent] = useState<string>('');
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const navigation = useNavigation();
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   // 텍스트 뷰어 설정
-  const [viewerOptions, setViewerOptions] = useState<TextViewerOptions>({
-    fontSize: 16,
-    lineHeight: 1.5,
-    fontFamily: 'System',
-    theme: 'light',
-    textColor: '#333',
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginVertical: 16,
-  });
+  const { textViewerOptions, updateTextViewerOptions } = useViewerSettings();
 
   const loadTextContent = useCallback(async () => {
     try {
@@ -44,14 +38,9 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
     loadTextContent();
   }, [loadTextContent]);
 
-  // 설정 변경 핸들러
-  const handleSettingsChange = (newOptions: Partial<TextViewerOptions>) => {
-    setViewerOptions((prev) => ({ ...prev, ...newOptions }));
-  };
-
   // 테마에 따른 배경색과 텍스트 색상 가져오기
   const getThemeStyles = () => {
-    switch (viewerOptions.theme) {
+    switch (textViewerOptions.theme) {
       case 'light':
         return { backgroundColor: '#fff', textColor: '#333' };
       case 'dark':
@@ -59,7 +48,7 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
       case 'sepia':
         return { backgroundColor: '#f8f1e3', textColor: '#5b4636' };
       default:
-        return { backgroundColor: viewerOptions.backgroundColor, textColor: viewerOptions.textColor };
+        return { backgroundColor: textViewerOptions.backgroundColor, textColor: textViewerOptions.textColor };
     }
   };
 
@@ -73,8 +62,8 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
             style={[
               styles.scrollView,
               {
-                paddingHorizontal: viewerOptions.marginHorizontal,
-                paddingVertical: viewerOptions.marginVertical,
+                paddingHorizontal: textViewerOptions.marginHorizontal,
+                paddingVertical: textViewerOptions.marginVertical,
               },
             ]}
           >
@@ -82,9 +71,9 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
               style={[
                 styles.text,
                 {
-                  fontFamily: viewerOptions.fontFamily,
-                  fontSize: viewerOptions.fontSize,
-                  lineHeight: viewerOptions.fontSize * viewerOptions.lineHeight,
+                  fontFamily: textViewerOptions.fontFamily,
+                  fontSize: textViewerOptions.fontSize,
+                  lineHeight: textViewerOptions.fontSize * textViewerOptions.lineHeight,
                   color: themeStyles.textColor,
                 },
               ]}
@@ -102,7 +91,7 @@ export default function TextViewer({ uri, onSettings }: TextViewerProps) {
 
       {/* 설정 바텀 시트 */}
       <SettingsBottomSheet title="텍스트 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
-        <TextViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+        <TextViewerSettings options={textViewerOptions} onOptionsChange={updateTextViewerOptions} />
       </SettingsBottomSheet>
     </>
   );

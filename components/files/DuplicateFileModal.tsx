@@ -1,5 +1,7 @@
 import { View, Text, Modal, Pressable, TouchableOpacity, StyleSheet } from 'react-native';
 import { DuplicateFile } from '@/utils/filePickerManager';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 interface DuplicateFileModalProps {
   visible: boolean;
@@ -18,24 +20,33 @@ export default function DuplicateFileModal({
   onSkip,
   onOverwrite,
 }: DuplicateFileModalProps) {
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
+
   return (
     <Modal animationType="fade" transparent={true} visible={visible}>
       <Pressable style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: colors.background }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>중복된 파일</Text>
-            <Text style={styles.modalSubtitle}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>중복된 파일</Text>
+            <Text style={[styles.modalSubtitle, { color: colors.secondaryText }]}>
               {currentIndex + 1} / {totalCount}
             </Text>
           </View>
-          <Text style={styles.modalText}>
+          <Text style={[styles.modalText, { color: colors.text }]}>
             '{currentFile?.fileName}' 파일이 이미 존재합니다.{'\n'}어떻게 처리하시겠습니까?
           </Text>
           <View style={styles.modalButtons}>
-            <TouchableOpacity style={[styles.modalButton, styles.modalButtonSkip]} onPress={onSkip}>
-              <Text style={styles.modalButtonText}>건너뛰기</Text>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.modalButtonSkip, { backgroundColor: colors.buttonBackground }]}
+              onPress={onSkip}
+            >
+              <Text style={[styles.modalButtonText, { color: colors.secondaryText }]}>건너뛰기</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.modalButton, styles.modalButtonOverwrite]} onPress={onOverwrite}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.modalButtonOverwrite, { backgroundColor: colors.primary }]}
+              onPress={onOverwrite}
+            >
               <Text style={[styles.modalButtonText, styles.modalButtonTextOverwrite]}>덮어쓰기</Text>
             </TouchableOpacity>
           </View>
@@ -53,7 +64,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
     padding: 24,
     borderRadius: 16,
     width: '80%',
@@ -70,12 +80,10 @@ const styles = StyleSheet.create({
   },
   modalSubtitle: {
     fontSize: 14,
-    color: '#666',
     marginTop: 4,
   },
   modalText: {
     fontSize: 16,
-    color: '#333',
     textAlign: 'left',
     marginVertical: 16,
     lineHeight: 24,
@@ -102,7 +110,6 @@ const styles = StyleSheet.create({
   modalButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#666',
   },
   modalButtonTextOverwrite: {
     color: '#fff',

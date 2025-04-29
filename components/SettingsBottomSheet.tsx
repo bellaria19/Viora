@@ -2,6 +2,8 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 interface SettingsBottomSheetProps {
   title: string;
@@ -12,6 +14,8 @@ interface SettingsBottomSheetProps {
 
 export default function SettingsBottomSheet({ title, isVisible, onClose, children }: SettingsBottomSheetProps) {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   // 바텀 시트 스냅 포인트 설정 (화면의 80%)
   const snapPoints = useMemo(() => ['80%'], []);
@@ -49,13 +53,13 @@ export default function SettingsBottomSheet({ title, isVisible, onClose, childre
       onChange={handleSheetChanges}
       enablePanDownToClose={true}
       backdropComponent={renderBackdrop}
-      handleIndicatorStyle={styles.indicator}
-      backgroundStyle={styles.background}
+      handleIndicatorStyle={[styles.indicator, { backgroundColor: colors.secondaryText }]}
+      backgroundStyle={[styles.background, { backgroundColor: colors.background }]}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-          <FontAwesome6 name="xmark" size={20} color="#666" />
+          <FontAwesome6 name="xmark" size={20} color={colors.secondaryText} />
         </TouchableOpacity>
       </View>
       <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>{children}</BottomSheetScrollView>
@@ -68,7 +72,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   indicator: {
-    backgroundColor: '#ccc',
     width: 40,
   },
   header: {
@@ -78,7 +81,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   title: {
     fontSize: 18,

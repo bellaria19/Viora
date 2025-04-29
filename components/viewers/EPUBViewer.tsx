@@ -3,13 +3,14 @@ import { WebView } from 'react-native-webview';
 import React, { useState, useRef, useMemo } from 'react';
 import ViewerOverlay from './ViewerOverlay';
 import { useNavigation } from '@react-navigation/native';
-import { EPUBViewerOptions } from '@/types/option';
 import SettingsBottomSheet from '@/components/SettingsBottomSheet';
 import EPUBViewerSettings from '@/components/settings/EPUBViewerSettings';
+import { useViewerSettings } from '@/hooks/useViewerSettings';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 interface EPUBViewerProps {
   uri: string;
-  onSettings?: () => void;
 }
 
 export default function EPUBViewer({ uri }: EPUBViewerProps) {
@@ -17,32 +18,11 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
   const [settingsVisible, setSettingsVisible] = useState(false);
   const webViewRef = useRef<WebView>(null);
   const navigation = useNavigation();
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   // EPUB 뷰어 설정
-  const [viewerOptions, setViewerOptions] = useState<EPUBViewerOptions>({
-    viewMode: 'page',
-    enableRTL: false,
-    fontSize: 16,
-    lineHeight: 1.5,
-    fontFamily: 'System',
-    theme: 'light',
-    textColor: '#333',
-    backgroundColor: '#fff',
-    linkColor: '#0066cc',
-    marginHorizontal: 16,
-    marginVertical: 16,
-    enableTOC: true,
-    enableAnnotation: false,
-    enableBookmark: true,
-    enableSearch: true,
-    enableTextSelection: true,
-  });
-
-  // 설정 변경 핸들러
-  const handleSettingsChange = (newOptions: Partial<EPUBViewerOptions>) => {
-    setViewerOptions((prev) => ({ ...prev, ...newOptions }));
-    applySettingsToReader();
-  };
+  const { epubViewerOptions, updateEPUBViewerOptions } = useViewerSettings();
 
   // 설정을 WebView의 EPUB 리더에 적용하는 함수
   const applySettingsToReader = () => {
@@ -53,9 +33,9 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
     const js = `
       // 예시: 설정을 EPUB 리더에 적용하는 JavaScript 코드
       if (window.EPUBReader) {
-        window.EPUBReader.setFontSize(${viewerOptions.fontSize});
-        window.EPUBReader.setFontFamily('${viewerOptions.fontFamily}');
-        window.EPUBReader.setTheme('${viewerOptions.theme}');
+        window.EPUBReader.setFontSize(${epubViewerOptions.fontSize});
+        window.EPUBReader.setFontFamily('${epubViewerOptions.fontFamily}');
+        window.EPUBReader.setTheme('${epubViewerOptions.theme}');
         // 기타 설정들...
       }
       true;
@@ -68,12 +48,12 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
   const injectedJavaScript = useMemo(() => {
     return `
       // EPUB 리더 초기 설정을 위한 JavaScript
-      document.body.style.backgroundColor = '${viewerOptions.backgroundColor}';
-      document.body.style.color = '${viewerOptions.textColor}';
+      document.body.style.backgroundColor = '${epubViewerOptions.backgroundColor}';
+      document.body.style.color = '${epubViewerOptions.textColor}';
       // 기타 초기 설정...
       true;
     `;
-  }, []);
+  }, [epubViewerOptions.backgroundColor, epubViewerOptions.textColor]);
 
   // WebView가 로드될 때 호출되는 핸들러
   const handleWebViewLoad = () => {
@@ -83,7 +63,7 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
           <WebView
             ref={webViewRef}
             source={{ uri }}
@@ -103,7 +83,7 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
 
       {/* 설정 바텀 시트 */}
       <SettingsBottomSheet title="EPUB 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
-        <EPUBViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+        <EPUBViewerSettings options={epubViewerOptions} onOptionsChange={updateEPUBViewerOptions} />
       </SettingsBottomSheet>
     </>
   );
@@ -112,7 +92,6 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   webview: {
     flex: 1,

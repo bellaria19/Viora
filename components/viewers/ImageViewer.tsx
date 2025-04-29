@@ -4,9 +4,11 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import ViewerOverlay from './ViewerOverlay';
 import { useNavigation } from '@react-navigation/native';
-import { ImageViewerOptions } from '@/types/option';
 import SettingsBottomSheet from '@/components/SettingsBottomSheet';
 import ImageViewerSettings from '@/components/settings/ImageViewerSettings';
+import { useViewerSettings } from '@/hooks/useViewerSettings';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SPRING_CONFIG = {
@@ -16,7 +18,6 @@ const SPRING_CONFIG = {
 
 interface ImageViewerProps {
   uri: string;
-  onSettings?: () => void;
 }
 
 export default function ImageViewer({ uri }: ImageViewerProps) {
@@ -24,17 +25,11 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
   const [overlayVisible, setOverlayVisible] = useState(false);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const navigation = useNavigation();
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
 
   // 이미지 뷰어 설정
-  const [viewerOptions, setViewerOptions] = useState<ImageViewerOptions>({
-    enableDoubleTapZoom: true,
-    enablePreload: true,
-    enableCache: true,
-    showLoadingIndicator: true,
-    showFallbackImage: true,
-    loadingIndicatorColor: '#fff',
-    loadingBackgroundColor: 'rgba(0,0,0,0.5)',
-  });
+  const { imageViewerOptions, updateImageViewerOptions } = useViewerSettings();
 
   // 제스처 상태값
   const scale = useSharedValue(1);
@@ -84,7 +79,7 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
   const doubleTapGesture = Gesture.Tap()
     .numberOfTaps(2)
     .onStart(() => {
-      if (!viewerOptions.enableDoubleTapZoom) return;
+      if (!imageViewerOptions.enableDoubleTapZoom) return;
 
       if (scale.value > 1) {
         scale.value = withSpring(1, SPRING_CONFIG);
@@ -105,11 +100,6 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
     transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }],
   }));
 
-  // 설정 변경 핸들러
-  const handleSettingsChange = (newOptions: Partial<ImageViewerOptions>) => {
-    setViewerOptions((prev) => ({ ...prev, ...newOptions }));
-  };
-
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
@@ -123,11 +113,11 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
                 onLoadStart={() => setIsLoading(true)}
                 onLoadEnd={() => setIsLoading(false)}
               />
-              {isLoading && viewerOptions.showLoadingIndicator && (
+              {isLoading && imageViewerOptions.showLoadingIndicator && (
                 <ActivityIndicator
                   size="large"
-                  color={viewerOptions.loadingIndicatorColor}
-                  style={[styles.loading, { backgroundColor: viewerOptions.loadingBackgroundColor }]}
+                  color={imageViewerOptions.loadingIndicatorColor}
+                  style={[styles.loading, { backgroundColor: imageViewerOptions.loadingBackgroundColor }]}
                 />
               )}
             </Animated.View>
@@ -142,7 +132,7 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
 
       {/* 설정 바텀 시트 */}
       <SettingsBottomSheet title="이미지 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
-        <ImageViewerSettings options={viewerOptions} onOptionsChange={handleSettingsChange} />
+        <ImageViewerSettings options={imageViewerOptions} onOptionsChange={updateImageViewerOptions} />
       </SettingsBottomSheet>
     </>
   );

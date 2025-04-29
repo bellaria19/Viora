@@ -1,0 +1,33 @@
+// 앱에서 사용할 색상 정의
+export const Colors = {
+  light: {
+    primary: '#007AFF',
+    background: '#FFFFFF',
+    card: '#FFFFFF',
+    text: '#000000',
+    border: '#E5E5E5',
+    notification: '#FF3B30',
+    tabIconDefault: '#CCCCCC',
+    tabIconSelected: '#007AFF',
+    secondaryText: '#666666',
+    placeholder: '#999999',
+    buttonBackground: '#F5F5F5',
+    searchBackground: '#F5F5F5',
+    errorText: '#FF3B30',
+  },
+  dark: {
+    primary: '#0A84FF',
+    background: '#121212',
+    card: '#1C1C1E',
+    text: '#FFFFFF',
+    border: '#38383A',
+    notification: '#FF453A',
+    tabIconDefault: '#666666',
+    tabIconSelected: '#0A84FF',
+    secondaryText: '#AEAEB2',
+    placeholder: '#8E8E93',
+    buttonBackground: '#2C2C2E',
+    searchBackground: '#2C2C2E',
+    errorText: '#FF453A',
+  },
+};

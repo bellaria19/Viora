@@ -1,9 +1,27 @@
 import { Tabs } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { useTheme } from '@/hooks/useTheme';
+import { Colors } from '@/constants/Colors';
 
 export default function TabLayout() {
+  const { currentTheme } = useTheme();
+  const colors = Colors[currentTheme];
+
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.secondaryText,
+        tabBarStyle: {
+          backgroundColor: colors.background,
+          borderTopColor: colors.border,
+        },
+        headerStyle: {
+          backgroundColor: colors.background,
+        },
+        headerTintColor: colors.text,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
