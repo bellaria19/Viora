@@ -8,6 +8,9 @@ import ZipImageViewer from '@/components/viewers/ZipImageViewer';
 import PDFViewer from '@/components/viewers/PDFViewer';
 import EPUBViewer from '@/components/viewers/EPUBViewer';
 import TextViewer from '@/components/viewers/TextViewer';
+import ViewerLoading from '@/components/viewers/ViewerLoading';
+import ViewerError from '@/components/viewers/ViewerError';
+import ViewerUnsupported from '@/components/viewers/ViewerUnsupported';
 
 export default function ViewerScreen() {
   const params = useLocalSearchParams<{
@@ -47,19 +50,11 @@ export default function ViewerScreen() {
 
   const renderContent = () => {
     if (isLoading) {
-      return (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      );
+      return <ViewerLoading />;
     }
 
     if (error) {
-      return (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      );
+      return <ViewerError message={error} />;
     }
 
     switch (params.type) {
@@ -79,11 +74,7 @@ export default function ViewerScreen() {
         return <ZipImageViewer uri={params.uri} />;
 
       default:
-        return (
-          <View style={styles.centerContainer}>
-            <Text>지원하지 않는 파일 형식입니다.</Text>
-          </View>
-        );
+        return <ViewerUnsupported />;
     }
   };
 

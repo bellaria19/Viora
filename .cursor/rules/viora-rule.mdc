@@ -9,7 +9,9 @@ alwaysApply: false
 
 환경은 React Native + Expo + Typescript이다
 
-import React from 'React", React.FC 사용금지
+import React from 'React" 사용금지
+
+React.FC 사용금지
 
 React.useEffect와 같은 방식 사용금지 
 

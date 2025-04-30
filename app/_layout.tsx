@@ -8,7 +8,7 @@ import { ThemeProvider as NavigationThemeProvider, DefaultTheme, DarkTheme } fro
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ViewerSettingsProvider } from '@/contexts/ViewerSettingsContext';
 import { useTheme } from '@/hooks/useTheme';
-import { ThemedStatusBar } from '@/components/ThemedStatusBar';
+import { ThemedStatusBar } from '@/components/common/ThemedStatusBar';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
