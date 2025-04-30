@@ -1,0 +1,16 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+답변은 한국어를 사용
+
+파일 구조는 expo file structure를 사용
+
+환경은 React Native + Expo + Typescript이다
+
+import React from 'React", React.FC 사용금지
+
+React.useEffect와 같은 방식 사용금지 
+
+최대한 async/await, try/catch 사용하지 않기

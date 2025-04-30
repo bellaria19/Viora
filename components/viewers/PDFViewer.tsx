@@ -1,9 +1,9 @@
 import { View, StyleSheet, Dimensions, TouchableWithoutFeedback } from 'react-native';
 import Pdf from 'react-native-pdf';
-import React, { useState, useRef, useCallback } from 'react';
-import ViewerOverlay from './ViewerOverlay';
+import { useState, useRef } from 'react';
+import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/SettingsBottomSheet';
+import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
 import PDFViewerSettings from '@/components/settings/PDFViewerSettings';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
@@ -55,7 +55,7 @@ export default function PDFViewer({ uri }: PDFViewerProps) {
             enableRTL={pdfViewerOptions.enableRTL}
             enableDoubleTapZoom={pdfViewerOptions.enableDoubleTapZoom}
           />
-          <ViewerOverlay
+          <Overlay
             visible={overlayVisible}
             onBack={() => navigation.goBack()}
             onSettings={() => setSettingsVisible(true)}

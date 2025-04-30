@@ -4,7 +4,7 @@ import Slider from '@react-native-community/slider';
 import { useTheme } from '@/hooks/useTheme';
 import { Colors } from '@/constants/Colors';
 
-interface ViewerOverlayProps {
+interface OverlayProps {
   visible: boolean;
   onBack?: () => void;
   onSettings?: () => void;
@@ -14,7 +14,7 @@ interface ViewerOverlayProps {
   onPageChange?: (page: number) => void;
 }
 
-export default function ViewerOverlay({
+export default function Overlay({
   visible,
   onBack,
   onSettings,
@@ -22,7 +22,7 @@ export default function ViewerOverlay({
   currentPage = 1,
   totalPages = 1,
   onPageChange,
-}: ViewerOverlayProps) {
+}: OverlayProps) {
   const { currentTheme } = useTheme();
   const colors = Colors[currentTheme];
 

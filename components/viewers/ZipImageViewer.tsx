@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, TouchableWithoutFeedback } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import * as ZipArchive from 'react-native-zip-archive';
 import ImageViewer from './ImageViewer';
-import ViewerOverlay from './ViewerOverlay';
+import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/SettingsBottomSheet';
+import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
 import ZipImageViewerSettings from '@/components/settings/ZipImageViewerSettings';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
@@ -161,7 +161,7 @@ export default function ZipImageViewer({ uri }: ZipImageViewerProps) {
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
         <View style={styles.container}>
           {images.length > 0 && <ImageViewer uri={images[currentIndex]} />}
-          <ViewerOverlay
+          <Overlay
             visible={overlayVisible}
             onBack={() => navigation.goBack()}
             onSettings={() => setSettingsVisible(true)}

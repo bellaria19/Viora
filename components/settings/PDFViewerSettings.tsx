@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import Slider from '@react-native-community/slider';
 import { FontAwesome6 } from '@expo/vector-icons';

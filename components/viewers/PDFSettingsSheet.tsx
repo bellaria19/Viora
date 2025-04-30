@@ -1,4 +1,3 @@
-import React from 'react';
 import { View, Text, StyleSheet, Button, TouchableOpacity, Modal } from 'react-native';
 
 interface PDFSettingsSheetProps {

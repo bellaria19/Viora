@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TextViewerOptions, PDFViewerOptions, ImageViewerOptions, EPUBViewerOptions } from '@/types/option';
 
@@ -52,6 +52,7 @@ const defaultPDFViewerOptions: PDFViewerOptions = {
   enableDoubleTapZoom: true,
   showLoadingIndicator: true,
   showThumbnails: false,
+  theme: 'light',
 };
 
 const defaultImageViewerOptions: ImageViewerOptions = {
@@ -62,6 +63,7 @@ const defaultImageViewerOptions: ImageViewerOptions = {
   showFallbackImage: true,
   loadingIndicatorColor: '#fff',
   loadingBackgroundColor: 'rgba(0,0,0,0.5)',
+  theme: 'light',
 };
 
 const defaultEPUBViewerOptions: EPUBViewerOptions = {
@@ -95,6 +97,7 @@ const defaultZipViewerOptions: ZipImageViewerOptions = {
   autoPlayEnabled: false,
   autoPlayInterval: 3,
   loopEnabled: true,
+  theme: 'light',
 };
 
 // 컨텍스트 생성

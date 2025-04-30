@@ -1,6 +1,12 @@
-// import FastImage from 'react-native-fast-image';
+// 뷰어 옵션 타입 정의
 
-export interface ImageViewerOptions {
+// 뷰어 공통 옵션 (베이스 타입)
+export interface BaseViewerOptions {
+  theme: 'light' | 'dark' | 'sepia';
+}
+
+// 이미지 뷰어 옵션
+export interface ImageViewerOptions extends BaseViewerOptions {
   enableDoubleTapZoom: boolean;
 
   // 성능 설정
@@ -14,17 +20,18 @@ export interface ImageViewerOptions {
   // 스타일 설정
   loadingIndicatorColor: string;
   loadingBackgroundColor: string;
-  // imagePriority: keyof typeof FastImage.priority;
 }
 
-export interface ImageViewerSettingsProps {
-  options: ImageViewerOptions;
-  onOptionsChange: (newOptions: Partial<ImageViewerOptions>) => void;
-  onClose: () => void;
-  visible: boolean;
+// ZIP 이미지 뷰어 옵션
+export interface ZipImageViewerOptions extends ImageViewerOptions {
+  sortImagesBy: 'name' | 'date' | 'size';
+  autoPlayEnabled: boolean;
+  autoPlayInterval: number; // 초 단위
+  loopEnabled: boolean;
 }
 
-export interface PDFViewerOptions {
+// PDF 뷰어 옵션
+export interface PDFViewerOptions extends BaseViewerOptions {
   // 뷰어 모드 설정
   viewMode: 'scroll' | 'page';
   enableRTL: boolean;
@@ -44,19 +51,12 @@ export interface PDFViewerOptions {
   showThumbnails: boolean;
 }
 
-export interface PDFViewerSettingsProps {
-  options: PDFViewerOptions;
-  onOptionsChange: (options: Partial<PDFViewerOptions>) => void;
-  onClose: () => void;
-  visible: boolean;
-}
-
-export interface TextViewerOptions {
+// 텍스트 뷰어 옵션
+export interface TextViewerOptions extends BaseViewerOptions {
   // 텍스트 표시 설정
   fontSize: number;
   lineHeight: number;
   fontFamily: string;
-  theme: 'light' | 'dark' | 'sepia';
 
   // 색상 설정
   textColor: string;
@@ -65,21 +65,10 @@ export interface TextViewerOptions {
   // 여백 설정
   marginHorizontal: number;
   marginVertical: number;
-
-  // 기타 설정
-  // enableRTL: boolean;
-  // enableLineNumbers: boolean;
-  // enableWordWrap: boolean;
 }
 
-export interface TextViewerSettingsProps {
-  options: TextViewerOptions;
-  onOptionsChange: (newOptions: Partial<TextViewerOptions>) => void;
-  onClose: () => void;
-  visible: boolean;
-}
-
-export interface EPUBViewerOptions {
+// EPUB 뷰어 옵션
+export interface EPUBViewerOptions extends BaseViewerOptions {
   // 뷰어 모드 설정
   viewMode: 'scroll' | 'page';
   enableRTL: boolean;
@@ -88,7 +77,6 @@ export interface EPUBViewerOptions {
   fontSize: number;
   lineHeight: number;
   fontFamily: string;
-  theme: 'light' | 'dark' | 'sepia';
 
   // 색상 설정
   textColor: string;
@@ -107,9 +95,16 @@ export interface EPUBViewerOptions {
   enableTextSelection: boolean; // 텍스트 선택 기능 활성화
 }
 
-export interface EPUBViewerSettingsProps {
-  options: EPUBViewerOptions;
-  onOptionsChange: (newOptions: Partial<EPUBViewerOptions>) => void;
-  onClose: () => void;
-  visible: boolean;
+// 설정 컴포넌트 props 인터페이스
+export interface ViewerSettingsProps<T> {
+  options: T;
+  onOptionsChange: (newOptions: Partial<T>) => void;
+  onClose?: () => void;
+  visible?: boolean;
 }
+
+export type TextViewerSettingsProps = ViewerSettingsProps<TextViewerOptions>;
+export type PDFViewerSettingsProps = ViewerSettingsProps<PDFViewerOptions>;
+export type EPUBViewerSettingsProps = ViewerSettingsProps<EPUBViewerOptions>;
+export type ImageViewerSettingsProps = ViewerSettingsProps<ImageViewerOptions>;
+export type ZipImageViewerSettingsProps = ViewerSettingsProps<ZipImageViewerOptions>;

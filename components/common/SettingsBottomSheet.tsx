@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { FontAwesome6 } from '@expo/vector-icons';
@@ -37,7 +37,7 @@ export default function SettingsBottomSheet({ title, isVisible, onClose, childre
   );
 
   // 바텀 시트 열기/닫기
-  React.useEffect(() => {
+  useEffect(() => {
     if (isVisible) {
       bottomSheetRef.current?.expand();
     } else {

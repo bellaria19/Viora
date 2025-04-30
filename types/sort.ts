@@ -1,5 +1,8 @@
+// 정렬 관련 타입 정의
+export type SortOptionId = 'name_asc' | 'name_desc' | 'size_asc' | 'size_desc' | 'date_asc' | 'date_desc';
+
 export interface SortMenuItem {
-  id: 'name_asc' | 'name_desc' | 'size_asc' | 'size_desc' | 'date_asc' | 'date_desc';
+  id: SortOptionId;
   label: string;
   icon: string;
 }

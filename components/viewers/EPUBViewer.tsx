@@ -1,9 +1,9 @@
 import { View, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { WebView } from 'react-native-webview';
-import React, { useState, useRef, useMemo } from 'react';
-import ViewerOverlay from './ViewerOverlay';
+import { useState, useRef, useMemo } from 'react';
+import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/SettingsBottomSheet';
+import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
 import EPUBViewerSettings from '@/components/settings/EPUBViewerSettings';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
@@ -73,7 +73,7 @@ export default function EPUBViewer({ uri }: EPUBViewerProps) {
             injectedJavaScript={injectedJavaScript}
             onLoad={handleWebViewLoad}
           />
-          <ViewerOverlay
+          <Overlay
             visible={overlayVisible}
             onBack={() => navigation.goBack()}
             onSettings={() => setSettingsVisible(true)}

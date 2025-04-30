@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, Image, StyleSheet, Dimensions, ActivityIndicator, TouchableWithoutFeedback } from 'react-native';
 import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import ViewerOverlay from './ViewerOverlay';
+import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/SettingsBottomSheet';
+import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
 import ImageViewerSettings from '@/components/settings/ImageViewerSettings';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
@@ -122,7 +122,7 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
               )}
             </Animated.View>
           </GestureDetector>
-          <ViewerOverlay
+          <Overlay
             visible={overlayVisible}
             onBack={() => navigation.goBack()}
             onSettings={() => setSettingsVisible(true)}

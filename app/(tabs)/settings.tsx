@@ -1,4 +1,4 @@
-import { View, Text, Switch, StyleSheet, TouchableOpacity, Alert, SectionList } from 'react-native';
+import { View, Text, Switch, StyleSheet, Alert } from 'react-native';
 import { useState } from 'react';
 import { resetAllFiles } from '@/utils/fileManager';
 import { useTheme } from '@/hooks/useTheme';
@@ -10,6 +10,9 @@ import ImageViewerSettingsItem from '@/components/settings/ImageViewerSettingsIt
 import EPUBViewerSettingsItem from '@/components/settings/EPUBViewerSettingsItem';
 import ZipViewerSettingsItem from '@/components/settings/ZipImageViewerSettingsItem';
 import ViewerSettingsScreen from '@/components/settings/ViewerSettingsScreen';
+import SettingItem from '@/components/settings/SettingItem';
+import ResetButton from '@/components/settings/ResetButton';
+import SettingSectionList from '@/components/settings/SettingSectionList';
 
 // 섹션 데이터 타입 정의
 interface SettingsSection {
@@ -99,29 +102,35 @@ export default function SettingsScreen() {
         {
           key: 'theme',
           render: () => (
-            <TouchableOpacity
-              style={[styles.settingItem, { borderBottomColor: colors.border }]}
+            <SettingItem
+              title="테마"
               onPress={handleThemeSelection}
-            >
-              <Text style={[styles.settingText, { color: colors.text }]}>테마</Text>
-              <View style={styles.themeSelector}>
-                <Text style={[styles.themeText, { color: colors.secondaryText }]}>{getThemeText()}</Text>
-                <FontAwesome6 name="chevron-right" size={14} color={colors.secondaryText} />
-              </View>
-            </TouchableOpacity>
+              rightElement={
+                <View style={styles.themeSelector}>
+                  <Text style={[styles.themeText, { color: colors.secondaryText }]}>{getThemeText()}</Text>
+                  <FontAwesome6 name="chevron-right" size={14} color={colors.secondaryText} />
+                </View>
+              }
+              style={{ borderBottomColor: colors.border }}
+              titleStyle={{ color: colors.text }}
+            />
           ),
         },
         {
           key: 'autoOpen',
           render: () => (
-            <View style={[styles.settingItem, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.settingText, { color: colors.text }]}>파일 자동 열기</Text>
-              <Switch
-                value={autoOpen}
-                onValueChange={setAutoOpen}
-                trackColor={{ false: colors.buttonBackground, true: colors.primary }}
-              />
-            </View>
+            <SettingItem
+              title="파일 자동 열기"
+              rightElement={
+                <Switch
+                  value={autoOpen}
+                  onValueChange={setAutoOpen}
+                  trackColor={{ false: colors.buttonBackground, true: colors.primary }}
+                />
+              }
+              style={{ borderBottomColor: colors.border }}
+              titleStyle={{ color: colors.text }}
+            />
           ),
         },
       ],
@@ -157,10 +166,12 @@ export default function SettingsScreen() {
         {
           key: 'version',
           render: () => (
-            <View style={[styles.settingItem, { borderBottomColor: colors.border }]}>
-              <Text style={[styles.settingText, { color: colors.text }]}>버전</Text>
-              <Text style={{ color: colors.secondaryText }}>1.0.0</Text>
-            </View>
+            <SettingItem
+              title="버전"
+              rightElement={<Text style={{ color: colors.secondaryText }}>1.0.0</Text>}
+              style={{ borderBottomColor: colors.border }}
+              titleStyle={{ color: colors.text }}
+            />
           ),
         },
       ],
@@ -170,14 +181,7 @@ export default function SettingsScreen() {
       data: [
         {
           key: 'reset',
-          render: () => (
-            <TouchableOpacity
-              style={[styles.resetButton, { backgroundColor: colors.errorText }]}
-              onPress={handleResetFiles}
-            >
-              <Text style={styles.resetButtonText}>모든 파일 초기화</Text>
-            </TouchableOpacity>
-          ),
+          render: () => <ResetButton label="모든 파일 초기화" onPress={handleResetFiles} color={colors.errorText} />,
         },
       ],
     },
@@ -192,15 +196,12 @@ export default function SettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <SectionList
+      <SettingSectionList
         sections={sections}
         keyExtractor={(item) => item.key}
         renderItem={({ item }) => item.render()}
-        renderSectionHeader={({ section: { title } }) => (
-          <View style={[styles.sectionHeader, { backgroundColor: colors.background }]}>
-            <Text style={[styles.sectionHeaderText, { color: colors.secondaryText }]}>{title}</Text>
-          </View>
-        )}
+        sectionHeaderStyle={{ backgroundColor: colors.background }}
+        sectionHeaderTextStyle={{ color: colors.secondaryText }}
         stickySectionHeadersEnabled={true}
         contentContainerStyle={styles.listContent}
       />

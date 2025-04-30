@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Text, TouchableWithoutFeedback } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import ViewerOverlay from './ViewerOverlay';
+import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/SettingsBottomSheet';
+import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
 import TextViewerSettings from '@/components/settings/TextViewerSettings';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
@@ -81,7 +81,7 @@ export default function TextViewer({ uri }: TextViewerProps) {
               {content}
             </Text>
           </ScrollView>
-          <ViewerOverlay
+          <Overlay
             visible={overlayVisible}
             onBack={() => navigation.goBack()}
             onSettings={() => setSettingsVisible(true)}
