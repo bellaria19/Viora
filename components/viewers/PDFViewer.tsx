@@ -3,8 +3,7 @@ import Pdf from 'react-native-pdf';
 import { useState, useRef } from 'react';
 import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
-import PDFViewerSettings from '@/components/settings/PDFViewerSettings';
+import SettingsBottomSheet, { SettingsSection } from '@/components/common/SettingsBottomSheet';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
 import { Colors } from '@/constants/Colors';
@@ -35,6 +34,95 @@ export default function PDFViewer({ uri }: PDFViewerProps) {
   const pdfHorizontal = pdfViewerOptions.viewMode === 'page';
   const pdfSpacing = pdfViewerOptions.pageSpacing;
   const pdfEnablePaging = pdfViewerOptions.viewMode === 'page';
+
+  // SectionList 데이터 구조 정의
+  const sections: SettingsSection[] = [
+    {
+      title: '뷰어 모드',
+      data: [
+        {
+          key: 'viewMode',
+          type: 'button-group',
+          value: pdfViewerOptions.viewMode,
+          label: '뷰어 모드',
+          options: [
+            { value: 'page', label: '페이지', icon: 'file' },
+            { value: 'scroll', label: '스크롤', icon: 'scroll' },
+          ],
+        },
+      ],
+    },
+    {
+      title: '페이지 설정',
+      data: [
+        {
+          key: 'pageSpacing',
+          type: 'slider',
+          value: pdfViewerOptions.pageSpacing,
+          label: '페이지 간격',
+          min: 0,
+          max: 20,
+          step: 1,
+          unit: 'px',
+        },
+        {
+          key: 'showPageNumbers',
+          type: 'switch',
+          value: pdfViewerOptions.showPageNumbers,
+          label: '페이지 번호 표시',
+        },
+      ],
+    },
+    {
+      title: '성능 설정',
+      data: [
+        {
+          key: 'enableCache',
+          type: 'switch',
+          value: pdfViewerOptions.enableCache,
+          label: '캐시 사용',
+        },
+        {
+          key: 'enableDoubleTapZoom',
+          type: 'switch',
+          value: pdfViewerOptions.enableDoubleTapZoom,
+          label: '더블 탭 확대/축소',
+        },
+      ],
+    },
+    {
+      title: '화면 표시 설정',
+      data: [
+        {
+          key: 'showLoadingIndicator',
+          type: 'switch',
+          value: pdfViewerOptions.showLoadingIndicator,
+          label: '로딩 표시',
+        },
+        {
+          key: 'showThumbnails',
+          type: 'switch',
+          value: pdfViewerOptions.showThumbnails,
+          label: '썸네일 표시',
+        },
+      ],
+    },
+    {
+      title: '기타 설정',
+      data: [
+        {
+          key: 'enableRTL',
+          type: 'switch',
+          value: pdfViewerOptions.enableRTL,
+          label: 'RTL 방향 (오른쪽에서 왼쪽)',
+        },
+      ],
+    },
+  ];
+
+  const handleOptionChange = (key: string, value: any) => {
+    updatePDFViewerOptions({ [key]: value });
+  };
 
   return (
     <>
@@ -68,9 +156,13 @@ export default function PDFViewer({ uri }: PDFViewerProps) {
       </TouchableWithoutFeedback>
 
       {/* 설정 바텀 시트 */}
-      <SettingsBottomSheet title="PDF 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
-        <PDFViewerSettings options={pdfViewerOptions} onOptionsChange={updatePDFViewerOptions} />
-      </SettingsBottomSheet>
+      <SettingsBottomSheet
+        title="PDF 설정"
+        isVisible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+        sections={sections}
+        onOptionChange={handleOptionChange}
+      />
     </>
   );
 }

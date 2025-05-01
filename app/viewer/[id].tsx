@@ -1,4 +1,3 @@
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { useEffect, useState, useCallback } from 'react';
 import { addRecentFile } from '@/utils/fileManager';
@@ -90,18 +89,3 @@ export default function ViewerScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  centerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-  },
-  errorText: {
-    color: '#ff3b30',
-    fontSize: 16,
-    textAlign: 'center',
-    paddingHorizontal: 32,
-  },
-});

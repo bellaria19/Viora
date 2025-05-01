@@ -4,8 +4,7 @@ import { GestureDetector, Gesture } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
-import ImageViewerSettings from '@/components/settings/ImageViewerSettings';
+import SettingsBottomSheet, { SettingsSection } from '@/components/common/SettingsBottomSheet';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
 import { Colors } from '@/constants/Colors';
@@ -100,6 +99,80 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
     transform: [{ translateX: translateX.value }, { translateY: translateY.value }, { scale: scale.value }],
   }));
 
+  // SectionList 데이터 구조 정의
+  const colorOptions = ['#fff', '#007AFF', '#FF9500', '#FF2D55'];
+  const bgColorOptions = ['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.5)', 'rgba(0,0,0,0.8)', 'transparent'];
+  const sections: SettingsSection[] = [
+    {
+      title: '제스처 설정',
+      data: [
+        {
+          key: 'enableDoubleTapZoom',
+          type: 'switch',
+          value: imageViewerOptions.enableDoubleTapZoom,
+          label: '더블 탭 확대/축소',
+        },
+      ],
+    },
+    {
+      title: '성능 설정',
+      data: [
+        {
+          key: 'enablePreload',
+          type: 'switch',
+          value: imageViewerOptions.enablePreload,
+          label: '이미지 미리 로드',
+        },
+        {
+          key: 'enableCache',
+          type: 'switch',
+          value: imageViewerOptions.enableCache,
+          label: '이미지 캐싱',
+        },
+      ],
+    },
+    {
+      title: '표시 설정',
+      data: [
+        {
+          key: 'showLoadingIndicator',
+          type: 'switch',
+          value: imageViewerOptions.showLoadingIndicator,
+          label: '로딩 인디케이터 표시',
+        },
+        {
+          key: 'showFallbackImage',
+          type: 'switch',
+          value: imageViewerOptions.showFallbackImage,
+          label: '오류 시 기본 이미지 표시',
+        },
+      ],
+    },
+    {
+      title: '색상 설정',
+      data: [
+        {
+          key: 'loadingIndicatorColor',
+          type: 'color-group',
+          value: imageViewerOptions.loadingIndicatorColor,
+          label: '로딩 인디케이터 색상',
+          colorOptions,
+        },
+        {
+          key: 'loadingBackgroundColor',
+          type: 'color-group',
+          value: imageViewerOptions.loadingBackgroundColor,
+          label: '로딩 배경 색상',
+          colorOptions: bgColorOptions,
+        },
+      ],
+    },
+  ];
+
+  const handleOptionChange = (key: string, value: any) => {
+    updateImageViewerOptions({ [key]: value });
+  };
+
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
@@ -131,9 +204,13 @@ export default function ImageViewer({ uri }: ImageViewerProps) {
       </TouchableWithoutFeedback>
 
       {/* 설정 바텀 시트 */}
-      <SettingsBottomSheet title="이미지 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
-        <ImageViewerSettings options={imageViewerOptions} onOptionsChange={updateImageViewerOptions} />
-      </SettingsBottomSheet>
+      <SettingsBottomSheet
+        title="이미지 설정"
+        isVisible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+        sections={sections}
+        onOptionChange={handleOptionChange}
+      />
     </>
   );
 }

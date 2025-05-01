@@ -8,7 +8,7 @@ import { ThemeProvider as NavigationThemeProvider, DefaultTheme, DarkTheme } fro
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { ViewerSettingsProvider } from '@/contexts/ViewerSettingsContext';
 import { useTheme } from '@/hooks/useTheme';
-import { ThemedStatusBar } from '@/components/common/ThemedStatusBar';
+import { StatusBar } from 'expo-status-bar';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -18,7 +18,12 @@ function NavigationTheme({ children }: { children: React.ReactNode }) {
   const { currentTheme } = useTheme();
   const theme = currentTheme === 'dark' ? DarkTheme : DefaultTheme;
 
-  return <NavigationThemeProvider value={theme}>{children}</NavigationThemeProvider>;
+  return (
+    <NavigationThemeProvider value={theme}>
+      {children}
+      <StatusBar style={currentTheme === 'dark' ? 'light' : 'dark'} />
+    </NavigationThemeProvider>
+  );
 }
 
 export default function RootLayout() {
@@ -60,7 +65,6 @@ export default function RootLayout() {
               />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <ThemedStatusBar />
           </NavigationTheme>
         </ViewerSettingsProvider>
       </ThemeProvider>

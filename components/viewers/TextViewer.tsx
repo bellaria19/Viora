@@ -3,8 +3,7 @@ import { View, StyleSheet, ScrollView, Text, TouchableWithoutFeedback } from 're
 import * as FileSystem from 'expo-file-system';
 import Overlay from '../common/Overlay';
 import { useNavigation } from '@react-navigation/native';
-import SettingsBottomSheet from '@/components/common/SettingsBottomSheet';
-import TextViewerSettings from '@/components/settings/TextViewerSettings';
+import SettingsBottomSheet, { SettingsSection } from '@/components/common/SettingsBottomSheet';
 import { useViewerSettings } from '@/hooks/useViewerSettings';
 import { useTheme } from '@/hooks/useTheme';
 import { Colors } from '@/constants/Colors';
@@ -54,6 +53,100 @@ export default function TextViewer({ uri }: TextViewerProps) {
 
   const themeStyles = getThemeStyles();
 
+  // SectionList 데이터 구조 정의
+  const themes = [
+    { value: 'light', label: '라이트', bgColor: '#fff', textColor: '#333' },
+    { value: 'dark', label: '다크', bgColor: '#1a1a1a', textColor: '#eee' },
+    { value: 'sepia', label: '세피아', bgColor: '#f8f1e3', textColor: '#5b4636' },
+  ];
+  const fonts = [
+    { value: 'System', label: '시스템' },
+    { value: 'SpaceMono', label: '스페이스 모노' },
+    { value: 'Arial', label: '아리알' },
+    { value: 'Georgia', label: '조지아' },
+  ];
+  const sections: SettingsSection[] = [
+    {
+      title: '테마',
+      data: [
+        {
+          key: 'theme',
+          type: 'button-group',
+          value: textViewerOptions.theme,
+          label: '테마',
+          options: themes.map((t) => ({ value: t.value, label: t.label })),
+        },
+      ],
+    },
+    {
+      title: '글꼴',
+      data: [
+        {
+          key: 'fontFamily',
+          type: 'button-group',
+          value: textViewerOptions.fontFamily,
+          label: '글꼴',
+          options: fonts,
+        },
+      ],
+    },
+    {
+      title: '글자 크기',
+      data: [
+        {
+          key: 'fontSize',
+          type: 'slider',
+          value: textViewerOptions.fontSize,
+          label: '글자 크기',
+          min: 12,
+          max: 28,
+          step: 1,
+          unit: 'px',
+        },
+      ],
+    },
+    {
+      title: '줄 간격',
+      data: [
+        {
+          key: 'lineHeight',
+          type: 'slider',
+          value: textViewerOptions.lineHeight,
+          label: '줄 간격',
+          min: 1.0,
+          max: 2.5,
+          step: 0.1,
+        },
+      ],
+    },
+    {
+      title: '여백',
+      data: [
+        {
+          key: 'marginHorizontal',
+          type: 'slider',
+          value: textViewerOptions.marginHorizontal,
+          label: '여백',
+          min: 8,
+          max: 40,
+          step: 2,
+          unit: 'px',
+        },
+      ],
+    },
+  ];
+
+  const handleOptionChange = (key: string, value: any) => {
+    if (key === 'theme') {
+      const themeObj = themes.find((t) => t.value === value);
+      updateTextViewerOptions({ theme: value, backgroundColor: themeObj?.bgColor, textColor: themeObj?.textColor });
+    } else if (key === 'marginHorizontal') {
+      updateTextViewerOptions({ marginHorizontal: value, marginVertical: value });
+    } else {
+      updateTextViewerOptions({ [key]: value });
+    }
+  };
+
   return (
     <>
       <TouchableWithoutFeedback onPress={() => setOverlayVisible((v) => !v)}>
@@ -90,9 +183,13 @@ export default function TextViewer({ uri }: TextViewerProps) {
       </TouchableWithoutFeedback>
 
       {/* 설정 바텀 시트 */}
-      <SettingsBottomSheet title="텍스트 설정" isVisible={settingsVisible} onClose={() => setSettingsVisible(false)}>
-        <TextViewerSettings options={textViewerOptions} onOptionsChange={updateTextViewerOptions} />
-      </SettingsBottomSheet>
+      <SettingsBottomSheet
+        title="텍스트 설정"
+        isVisible={settingsVisible}
+        onClose={() => setSettingsVisible(false)}
+        sections={sections}
+        onOptionChange={handleOptionChange}
+      />
     </>
   );
 }
